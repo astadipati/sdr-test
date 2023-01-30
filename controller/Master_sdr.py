@@ -69,24 +69,21 @@ class Master_sdr(Config):
 
             conn.close()
             return data
-            pass
 
         except Exception as e:
             raise e
 
     def update_single_sites(self, id, post):
+        # print(f"id: {id} post: {post}")
         try:
             conn = self.cfx.connectDB()
 
             cursor = conn.cursor(dictionary=True)
-            query = "UPDATE iperf.sites SET terminal = 'mary.patterson@classicmodelcars.com WHERE employeeNumber = 1056"
+            query = f"UPDATE iperf.sites SET {post} WHERE id = {id}"
             cursor.execute(query)
-
-            data = cursor.fetchall()
-
+            conn.commit()
             conn.close()
-            return data
-            pass
+            return "ok"
 
         except Exception as e:
             raise e

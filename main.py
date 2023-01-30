@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from dotenv import dotenv_values
 from config.config import Config
 from controller.Master_sdr import Master_sdr
+from models.Client import IsStatusUpdate
 config = dotenv_values(".env")
 Cfx = Config(config)
 
@@ -44,3 +45,9 @@ def get_list_off():
 @app.get("/api/v1/terminal-detil/{id}", tags=["SDR Terminal"], status_code=200)
 def get_single_sites(id: int):
     return sdr.get_single_sites(id)
+
+
+@app.put("/api/v1/terminal-update-status/{id}", tags=["SDR Terminal"], status_code=200)
+def get_single_sites(id: int, post: IsStatusUpdate):
+    sdr.update_single_sites(id, post)
+    return post
