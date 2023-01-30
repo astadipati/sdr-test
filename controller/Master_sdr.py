@@ -75,13 +75,14 @@ class Master_sdr(Config):
             raise e
 
     def update_single_sites(self, id, post):
-        # print(f"id: {id} post: {post}")
+        print(f"id: {id} post: {post}")
         now = datetime.now()
         now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
+            # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET status='{post}', updated_at = '{now}' WHERE id = {id}"
             print(query)
             cursor.execute(query)
             conn.commit()
