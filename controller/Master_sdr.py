@@ -1,5 +1,6 @@
 from config.config import Config
 import pandas as pd
+from datetime import datetime
 
 
 class Master_sdr(Config):
@@ -75,11 +76,13 @@ class Master_sdr(Config):
 
     def update_single_sites(self, id, post):
         # print(f"id: {id} post: {post}")
+        now = datetime.now()
+        now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
             conn = self.cfx.connectDB()
-
             cursor = conn.cursor(dictionary=True)
-            query = f"UPDATE iperf.sites SET {post} WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
+            print(query)
             cursor.execute(query)
             conn.commit()
             conn.close()
