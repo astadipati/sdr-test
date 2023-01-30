@@ -57,6 +57,23 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
+    def get_single_sites(self, id):
+        try:
+            conn = self.cfx.connectDB()
+
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT * from iperf.sites WHERE id = {id}"
+            cursor.execute(query)
+
+            data = cursor.fetchall()
+
+            conn.close()
+            return data
+            pass
+
+        except Exception as e:
+            raise e
+
     def update_single_sites(self, id, post):
         try:
             conn = self.cfx.connectDB()
