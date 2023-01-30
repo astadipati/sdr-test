@@ -37,7 +37,7 @@ def get_list_on():
     return sdr.get_sites_status_on()
 
 
-@app.get("/api/v1/status-of/", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/status-off/", tags=["SDR Terminal"], status_code=200)
 def get_list_off():
     return sdr.get_sites_status_off()
 
