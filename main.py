@@ -27,27 +27,27 @@ app = FastAPI(
 #
 
 
-@app.get("/api/v1/list-sites/", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/list-sites/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list():
     return sdr.get_sites()
 
 
-@app.get("/api/v1/status-on/", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/status-on/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_on():
     return sdr.get_sites_status_on()
 
 
-@app.get("/api/v1/status-off/", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/status-off/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_off():
     return sdr.get_sites_status_off()
 
 
-@app.get("/api/v1/terminal-detil/{id}", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/terminal-detil/{id}", tags=["SDR Terminal Reference"], status_code=200)
 def get_single_sites(id: int):
     return sdr.get_single_sites(id)
 
 
-@app.get("/api/v1/terminal-update-status/{id}/{post}", tags=["SDR Terminal"], status_code=200)
+@app.get("/api/v1/terminal-update-status/{id}/{post}", tags=["SDR Terminal Reference"], status_code=200)
 # def update_single_sites(id: int, post: IsStatusUpdate):
 def update_single_sites(id: int, post: str):
     sdr.update_single_sites(id, post)
