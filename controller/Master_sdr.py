@@ -10,16 +10,12 @@ class Master_sdr(Config):
     def get_sites(self):
         try:
             conn = self.cfx.connectDB()
-
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT * from iperf.sites"
+            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites"
             cursor.execute(query)
-
             data = cursor.fetchall()
-
             conn.close()
             return data
-            pass
 
         except Exception as e:
             raise e
@@ -27,16 +23,12 @@ class Master_sdr(Config):
     def get_sites_status_on(self):
         try:
             conn = self.cfx.connectDB()
-
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT * from iperf.sites WHERE status = 1"
+            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
             cursor.execute(query)
-
             data = cursor.fetchall()
-
             conn.close()
             return data
-            pass
 
         except Exception as e:
             raise e
@@ -44,16 +36,12 @@ class Master_sdr(Config):
     def get_sites_status_off(self):
         try:
             conn = self.cfx.connectDB()
-
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT * from iperf.sites WHERE status = 0"
+            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 0"
             cursor.execute(query)
-
             data = cursor.fetchall()
-
             conn.close()
             return data
-            pass
 
         except Exception as e:
             raise e
@@ -61,13 +49,10 @@ class Master_sdr(Config):
     def get_single_sites(self, id):
         try:
             conn = self.cfx.connectDB()
-
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT * from iperf.sites WHERE id = {id}"
+            query = f"SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE id = {id}"
             cursor.execute(query)
-
             data = cursor.fetchall()
-
             conn.close()
             return data
 
@@ -75,7 +60,6 @@ class Master_sdr(Config):
             raise e
 
     def update_single_sites(self, id, post):
-        print(f"id: {id} post: {post}")
         now = datetime.now()
         now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
