@@ -29,3 +29,13 @@ app = FastAPI(
 @app.post("/api/v1/list-sites/", tags=["Test"], status_code=200)
 def get_list():
     return sdr.get_sites()
+
+
+@app.post("/api/v1/status-on/", tags=["Test"], status_code=200)
+def get_list_on():
+    return sdr.get_sites_status_on()
+
+
+@app.post("/api/v1/status-of/", tags=["Test"], status_code=200)
+def get_list_off():
+    return sdr.get_sites_status_off()
