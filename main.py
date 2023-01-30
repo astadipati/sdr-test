@@ -48,6 +48,6 @@ def get_single_sites(id: int):
 
 
 @app.put("/api/v1/terminal-update-status/{id}", tags=["SDR Terminal"], status_code=200)
-def get_single_sites(id: int, post: IsStatusUpdate):
+def update_single_sites(id: int, post: IsStatusUpdate):
     sdr.update_single_sites(id, post)
     return post
