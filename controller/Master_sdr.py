@@ -1,11 +1,30 @@
 from config.config import Config
 import pandas as pd
 from datetime import datetime
+import time
+import subprocess
 
 
 class Master_sdr(Config):
     def __init__(self, cfg):
         self.cfx = Config(cfg)
+
+    def runandget(self, uname, ip_tr, ip_server, port, time_processing):
+
+        start = time.time()
+
+        print(f"do download test {uname}")
+
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i /api-nms/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R",
+                                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        time.sleep(10)
+        print(f"do upload test {uname}")
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i /api-nms/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing}",
+                                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
+        finish = time.time()
+        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
+        return myprocess
 
     def get_sites(self):
         try:
