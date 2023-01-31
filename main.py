@@ -54,6 +54,6 @@ def update_single_sites(id: int, post: str):
     return post
 
 
-@app.post("/api/n5/client-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
+@app.post("/api/v1/client-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
 def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
     return sdr.runandget(uname, ip_tr, ip_server, port, time_processing)
