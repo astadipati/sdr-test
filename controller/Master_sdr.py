@@ -15,11 +15,11 @@ class Master_sdr(Config):
 
         print(f"do download test {uname}")
 
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} iperf3 -c {ip_server} -p {port} -t {time_processing} -R",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         time.sleep(10)
         print(f"do upload test {uname}")
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} iperf3 -c {ip_server} -p {port} -t {time_processing}",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing}",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
@@ -30,7 +30,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites"
+            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -43,7 +43,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
+            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -56,7 +56,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 0"
+            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 0"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -69,7 +69,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT sites.id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE id = {id}"
+            query = f"SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE id = {id}"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -87,6 +87,24 @@ class Master_sdr(Config):
             # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
             query = f"UPDATE iperf.sites SET status='{post}', updated_at = '{now}' WHERE id = {id}"
             print(query)
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return "ok"
+
+        except Exception as e:
+            raise e
+
+    def update_mini_pc(self, id, post):
+        print(post)
+        now = datetime.now()
+        now = now.strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET name='{post.name}', subscriber_id='{post.subscriber_id}',ip='{post.ip}',port_server='{post.port_server}',user='{post.user}',ip_server = '{post.ip_server}', duration='{post.duration}', updated_at = '{now}' WHERE id = {id}"
+            # print(query)
             cursor.execute(query)
             conn.commit()
             conn.close()
