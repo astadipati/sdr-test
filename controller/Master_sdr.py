@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import time
 import subprocess
+import requests
 
 
 class Master_sdr(Config):
@@ -19,8 +20,14 @@ class Master_sdr(Config):
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
-        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
-        return myprocess
+        msg = (
+            f"Download SDR {uname} finished {round(start-finish),2} second(s)")
+        chatid = "-807500382"
+        pesan = msg
+        url = 'https://api.telegram.org/bot5967309694:AAGvfM2M48ltLamAGdhBO2lUQT_RwGu8XwE/sendMessage?chat_id=%s&text=%s&parse_mode=markdown' % (
+            chatid, pesan)
+        requests.post(url)
+        # return myprocess
 
     def upload(self, uname, ip_tr, ip_server, port, time_processing):
 
@@ -31,7 +38,13 @@ class Master_sdr(Config):
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
-        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
+        msg = (
+            f"Upload SDR {uname} finished {round(start-finish),2} second(s)")
+        chatid = "-807500382"
+        pesan = msg
+        url = 'https://api.telegram.org/bot5967309694:AAGvfM2M48ltLamAGdhBO2lUQT_RwGu8XwE/sendMessage?chat_id=%s&text=%s&parse_mode=markdown' % (
+            chatid, pesan)
+        requests.post(url)
         return myprocess
 
     def get_sites(self):
