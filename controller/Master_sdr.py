@@ -27,7 +27,7 @@ class Master_sdr(Config):
         url = 'https://api.telegram.org/bot5967309694:AAGvfM2M48ltLamAGdhBO2lUQT_RwGu8XwE/sendMessage?chat_id=%s&text=%s&parse_mode=markdown' % (
             chatid, pesan)
         requests.post(url)
-        # return myprocess
+        return myprocess
 
     def upload(self, uname, ip_tr, ip_server, port, time_processing):
 
