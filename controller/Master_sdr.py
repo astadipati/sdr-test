@@ -9,17 +9,25 @@ class Master_sdr(Config):
     def __init__(self, cfg):
         self.cfx = Config(cfg)
 
-    def runandget(self, uname, ip_tr, ip_server, port, time_processing):
+    def download(self, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
 
         print(f"do download test {uname}")
 
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b10m -R > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        time.sleep(10)
+
+        finish = time.time()
+        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
+        return myprocess
+
+    def upload(self, uname, ip_tr, ip_server, port, time_processing):
+
+        start = time.time()
+
         print(f"do upload test {uname}")
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing}",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
