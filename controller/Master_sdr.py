@@ -121,6 +121,21 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
+    def get_scheduler(self, id):
+        now = datetime.now()
+        now = now.replace(microsecond=0)
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b ON a.sites_id = b.id WHERE b.id = {id}"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            conn.close()
+            return data
+
+        except Exception as e:
+            raise e
+
     def post_scheduler(self, post):
         now = datetime.now()
         now = now.replace(microsecond=0)
@@ -128,6 +143,35 @@ class Master_sdr(Config):
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             query = f"INSERT INTO iperf.scheduler (sites_id, tipe, timee, comments, date_created) VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.comments}','{now}')"
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return
+
+        except Exception as e:
+            raise e
+
+    def update_scheduler(self, id, post):
+        now = datetime.now()
+        now = now.replace(microsecond=0)
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"UPDATE iperf.scheduler SET sites_id={post.sites_id}, tipe='{post.tipe}', timee='{post.timee}', comments='{post.comments}', updated_at='{now}' WHERE id={id}"
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return
+
+        except Exception as e:
+            raise e
+
+    def delete_scheduler(self, id):
+
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"DELETE FROM iperf.scheduler WHERE id={id}"
             cursor.execute(query)
             conn.commit()
             conn.close()

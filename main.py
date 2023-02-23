@@ -72,7 +72,24 @@ def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: s
     return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
 
 
+@app.get("/api/v1/get-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
+def get_scheduler(id: int):
+    return sdr.get_scheduler(id)
+
+
 @app.post("/api/v1/post-scheduler/", tags=["Scheduler SDR"], status_code=200)
 def post_scheduler(post: IsScheduler):
     sdr.post_scheduler(post)
     return (post)
+
+
+@app.put("/api/v1/update-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
+def update_scheduler(id: str, post: IsScheduler):
+    sdr.update_scheduler(id, post)
+    return (post)
+
+
+@app.delete("/api/v1/delete-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
+def delete_scheduler(id: str):
+    sdr.delete_scheduler(id)
+    return "Sukses Deleted"
