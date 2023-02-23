@@ -120,3 +120,18 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
+
+    def post_scheduler(self, post):
+        now = datetime.now()
+        now = now.replace(microsecond=0)
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"INSERT INTO iperf.scheduler (sites_id, tipe, timee, comments, date_created) VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.comments}','{now}')"
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return
+
+        except Exception as e:
+            raise e
