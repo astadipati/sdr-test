@@ -15,7 +15,7 @@ class Master_sdr(Config):
 
         print(f"do download test {uname}")
 
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b10m -R > /dev/null 2>/dev/null &",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b 10m -R > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
@@ -27,7 +27,7 @@ class Master_sdr(Config):
         start = time.time()
 
         print(f"do upload test {uname}")
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
+        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b  10m > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         finish = time.time()
