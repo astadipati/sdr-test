@@ -122,8 +122,6 @@ class Master_sdr(Config):
             raise e
 
     def get_scheduler(self, id):
-        now = datetime.now()
-        now = now.replace(microsecond=0)
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
