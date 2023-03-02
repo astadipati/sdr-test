@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+pandas
+pymongo
+requests
+pymysql
+mysql-connector-python
+python-dotenv
+datetime
+python-dateutil
