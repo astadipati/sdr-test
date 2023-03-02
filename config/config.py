@@ -1,4 +1,5 @@
 import mysql.connector as mysql
+from pymongo import MongoClient
 
 
 class Config:
@@ -13,3 +14,7 @@ class Config:
             host=self.config['DB_HOST']
 
         )  # connect to mariaBD
+
+    def connectMongo(self):
+        # connect to mongo
+        return MongoClient(self.config['URLMONGO'])

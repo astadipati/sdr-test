@@ -93,3 +93,8 @@ def update_scheduler(id: str, post: IsScheduler):
 def delete_scheduler(id: str):
     sdr.delete_scheduler(id)
     return "Sukses Deleted"
+
+
+@app.get("/api/n5/max-download/{device_id}", tags=["SDR Module"], status_code=200)
+async def get_val_max_download_today(device_id: str):
+    return sdr.get_val_max_download_today(device_id)

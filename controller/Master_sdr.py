@@ -177,3 +177,41 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
+
+    def get_val_max_download_today(self, device_id):
+        device = device_id.upper()
+        try:
+            date = datetime.now()
+            ed = date.replace(hour=0, minute=0, second=0, microsecond=0)
+            # print(ed)
+            # st = ed - timedelta(hours=24)
+            conn = self.cfx.connectMongo()
+            db = conn.nms_n5
+            col = db.data_sdr_module.find(
+                {"deviceID": device, "date_created": {'$gte': ed}, "download": {"$exists": "true"}}).sort("_id", -1)
+            data_dict = []
+            for i in col:
+                del i["_id"]
+                data_dict.append(i)
+            df = pd.DataFrame(data_dict)
+            limit = int(len(df))-1
+            # print(df)
+            # exit()
+            val_temp = []
+            for i in range(limit):
+                # 1048576
+                total = (
+                    # kbps
+                    # ((df["download"][i]-df"download"][i+1])*8)/307200)
+                    # mbps
+                    ((df["download"][i]-df["download"][i+1])*8)/314572800)
+                val_temp.append(total)
+            df['deviceID'] = device
+            df['max_val'] = pd.DataFrame(val_temp)
+            df['date_created'] = datetime.now().replace(second=0, microsecond=0)
+            df = pd.DataFrame.max(df)
+            data = df.to_dict()
+            return data
+
+        except Exception as e:
+            raise e
