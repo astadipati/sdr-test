@@ -12,7 +12,7 @@ app = FastAPI()
 
 # documenting API
 app = FastAPI(
-    # title="API NMS N3 & N5",
+    title="API NMS N3 & N5",
     description="API for handle SDR Client",
     version="0.0.1",
     terms_of_service="",
