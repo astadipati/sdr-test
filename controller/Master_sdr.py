@@ -13,26 +13,22 @@ class Master_sdr(Config):
 
         start = time.time()
 
-        print(f"do download test {uname}")
+        # print(f"do download test {uname}")
 
-        myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b 10m -R > /dev/null 2>/dev/null &",
+        subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b 10m -R > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-        finish = time.time()
-        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
-        return myprocess
+        return print("Done...! %s seconds" % (time.time() - start))
 
     def upload(self, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
 
-        print(f"do upload test {uname}")
+        # print(f"do upload test {uname}")
         myprocess = subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b  10m > /dev/null 2>/dev/null &",
                                      shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-        finish = time.time()
-        print(f"SDR {uname} finished {round(start-finish),2} second(s)")
-        return myprocess
+        return print("Done...! %s seconds" % (time.time() - start))
 
     def get_sites(self):
         try:
