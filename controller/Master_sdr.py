@@ -103,6 +103,24 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
+    def update_status_mini(self, id, post):
+        now = datetime.now()
+        now = now.strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET status='{post}', updated_at = '{now}' WHERE id = {id}"
+            print(query)
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return "ok"
+
+        except Exception as e:
+            raise e
+
+
     def update_mini_pc(self, id, post):
         print(post)
         now = datetime.now()
