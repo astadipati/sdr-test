@@ -58,7 +58,7 @@ class Master_sdr(Config):
                 }
             else:
                 info = {
-                    "status": "Port terpakai, tidak dapat melakukan test SDR",
+                    "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
                     "data": {
                         "Name":uname,
                         "Port":port,
