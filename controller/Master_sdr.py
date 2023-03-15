@@ -3,28 +3,74 @@ import pandas as pd
 from datetime import datetime
 import time
 import subprocess
+import requests
+
 
 
 class Master_sdr(Config):
     def __init__(self, cfg):
         self.cfx = Config(cfg)
+        
+    def get_status_port(self):
+        try:
+
+            url = "http://192.168.1.220/flux/api/server/statusport"
+
+            payload={}
+            headers = {}
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            data = response.json()
+            return data
+        except Exception as e:
+            raise e
 
     def download(self, uname, ip_tr, ip_server, port, time_processing):
-
         start = time.time()
+        print(ip_tr)
+        try:
+            url = "http://192.168.1.220/flux/api/server/statusport"
 
-        subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b 10m -R > /dev/null 2>/dev/null &",
-                                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        info = {
-            "status": "200",
-            "data": {
-                "Name":uname,
-                "Port":port,
-                "Time":time_processing,
-                "Executed": "%s seconds" % (time.time() - start)
-            }
-        }
-        return info
+            payload={}
+            headers = {}
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            data = response.json()
+            df = pd.DataFrame(data)
+            # print(df)
+            
+            df = df.loc[df['ip']==ip_tr]
+            val = df['status_port'].values[0]
+       
+            if val=='listen':
+                print("jalankan")
+
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -b 10m -R > /dev/null 2>/dev/null &",
+                                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                info = {
+                    "status": "sukses",
+                    "data": {
+                        "Name":uname,
+                        "Port":port,
+                        "Time":time_processing,
+                        "Executed": "%s seconds" % (time.time() - start)
+                    }
+                }
+            else:
+                info = {
+                    "status": "Port terpakai",
+                    "data": {
+                        "Name":uname,
+                        "Port":port,
+                        "Time":time_processing,
+                        "Executed": "%s seconds" % (time.time() - start)
+                    }
+                }
+            
+
+            return info
+        except Exception as e:
+            raise e
 
     def upload(self, uname, ip_tr, ip_server, port, time_processing):
 
