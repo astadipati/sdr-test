@@ -94,7 +94,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites"
+            query = "SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -107,7 +107,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
+            query = "SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -120,7 +120,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 0"
+            query = "SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 0"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -133,7 +133,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT sites.id, sites.subscriber_id, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE id = {id}"
+            query = f"SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE id = {id}"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -185,7 +185,7 @@ class Master_sdr(Config):
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
-            query = f"UPDATE iperf.sites SET name='{post.name}', subscriber_id='{post.subscriber_id}',ip='{post.ip}',port_server='{post.port_server}',user='{post.user}',ip_server = '{post.ip_server}', duration='{post.duration}', updated_at = '{now}' WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET name='{post.name}', subscriber_number='{post.subscriber_number}',ip='{post.ip}',port_server='{post.port_server}',user='{post.user}',ip_server = '{post.ip_server}', duration='{post.duration}', updated_at = '{now}' WHERE id = {id}"
             # print(query)
             cursor.execute(query)
             conn.commit()
@@ -208,6 +208,19 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
+    def get_scheduler_paginate(self):
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b ON a.sites_id = b.id"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            conn.close()
+            return data
+
+        except Exception as e:
+            raise e
+        
     def post_scheduler(self, post):
         now = datetime.now()
         now = now.replace(microsecond=0)

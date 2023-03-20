@@ -4,6 +4,7 @@ from config.config import Config
 from controller.Master_sdr import Master_sdr
 from models.Client import IsStatusUpdate
 from models.Scheduler import IsScheduler
+from fastapi_pagination import Page, add_pagination, paginate
 config = dotenv_values(".env")
 Cfx = Config(config)
 
@@ -71,6 +72,9 @@ def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: s
 def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
     return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
 
+@app.get("/api/v1/get-all-scheduler", tags=["Scheduler SDR"], status_code=200)
+def get_scheduler_paginate():
+    return paginate(sdr.get_scheduler_paginate())
 
 @app.get("/api/v1/get-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
 def get_scheduler(id: int):
@@ -103,3 +107,6 @@ async def get_val_max_download_today(device_id: str):
 @app.get("/api/n5/max-upload/{device_id}", tags=["SDR Module"], status_code=200)
 async def get_val_max_upload_today(device_id: str):
     return sdr.get_val_max_upload_today(device_id)
+
+add_pagination(app)
+
