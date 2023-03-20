@@ -185,7 +185,7 @@ class Master_sdr(Config):
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
-            query = f"UPDATE iperf.sites SET name='{post.name}', subscriber_number='{post.subscriber_number}',ip='{post.ip}',port_server='{post.port_server}',user='{post.user}',ip_server = '{post.ip_server}', duration='{post.duration}', updated_at = '{now}' WHERE id = {id}"
+            query = f"UPDATE iperf.sites SET name='{post.name}', subscriber_number='{post.subscriber_number}',ip='{post.ip}',port_server='{post.port_server}',user='{post.user}',ip_server = '{post.ip_server}', duration='{post.duration}', updated_at = '{now}', subscriber_number = '{post.subscriber_number}' WHERE id = {id}"
             # print(query)
             cursor.execute(query)
             conn.commit()

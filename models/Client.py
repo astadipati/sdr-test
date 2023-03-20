@@ -10,5 +10,6 @@ class IsStatusUpdate(BaseModel):
     # passwd: str
     ip_server: str
     duration: str
+    subscriber_number: str
 
     # updated_at: str
