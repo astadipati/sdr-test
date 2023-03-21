@@ -1,8 +1,9 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from dotenv import dotenv_values
 from config.config import Config
 from controller.Master_sdr import Master_sdr
-from models.Client import IsStatusUpdate
+from models.Client import IsStatusUpdate, IsPostMiniPC
 from models.Scheduler import IsScheduler
 from fastapi_pagination import Page, add_pagination, paginate
 config = dotenv_values(".env")
@@ -27,6 +28,23 @@ app = FastAPI(
         "url": "https://psn.co.id",
     },)
 #
+
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.post("/api/n5/add-mini-pc", tags=["SDR Module"], status_code=200)
+async def add_mini_pc(post: IsPostMiniPC):
+    sdr.add_mini_pc(post)
+    return post
 
 
 @app.get("/api/v1/list-sites/", tags=["SDR Terminal Reference"], status_code=200)

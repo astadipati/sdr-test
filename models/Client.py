@@ -11,4 +11,17 @@ class IsStatusUpdate(BaseModel):
     duration: str
     subscriber_number: str
 
+
+class IsPostMiniPC(BaseModel):
+    name: str
+    ip: str
+    port_server: str
+    user: str
+    passwd: str
+    ip_server: str
+    status: str
+    bitrate: str
+    duration: str
+    subscriber_number: str
+    beam: str
     # updated_at: str
