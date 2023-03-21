@@ -73,6 +73,12 @@ def update_single_sites(id: int, post: str):
     sdr.update_single_sites(id, post)
     return post
 
+@app.delete("/api/v1/terminal-delete/{id}", tags=["SDR Terminal Reference"], status_code=200)
+# def update_single_sites(id: int, post: IsStatusUpdate):
+def update_single_sites(id: int):
+    sdr.del_mini_pc(id)
+    return f"Sukses delete: {id}"
+
 
 @app.put("/api/v1/update-mini-pc/{id}", tags=["SDR Terminal Reference"], status_code=200)
 # def update_single_sites(id: int, post: IsStatusUpdate):

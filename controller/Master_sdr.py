@@ -15,10 +15,23 @@ class Master_sdr(Config):
             date = datetime.now()
             date = date.replace(microsecond=0)
             conn = self.cfx.connectDB()
-            # pas = post.pass
             cursor = conn.cursor(dictionary=True)
             query = f"""INSERT INTO iperf.sites (name,ip,port_server,user,pass,ip_server,status, bitrate, duration, subscriber_number,beam, created_at) 
             VALUES('{post.name}','{post.ip}','{post.port_server}','{post.user}','{post.passwd}','{post.ip_server}',{post.status},{post.bitrate},{post.duration},'{post.subscriber_number}','{post.beam}', '{date}') """
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            return 
+        except Exception as e:
+            raise e
+        
+    def del_mini_pc(self, id):
+        try:
+            date = datetime.now()
+            date = date.replace(microsecond=0)
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"DELETE FROM iperf.sites WHERE id={id}" 
             cursor.execute(query)
             conn.commit()
             conn.close()
