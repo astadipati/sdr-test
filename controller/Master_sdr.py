@@ -1,6 +1,6 @@
 from config.config import Config
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import subprocess
 import requests
@@ -236,14 +236,38 @@ class Master_sdr(Config):
             raise e
 
     def get_scheduler_paginate(self):
+        now = datetime.now()
+        now = now.strftime("%H:%M:%S")
+        # now = now.replace(microsecond=0, second=0, minute=0, hour=0)
+        print(now)
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b ON a.sites_id = b.id"
+            query = f"""SELECT b.id, b.name, a.timee, a.tipe, a.comments 
+                        FROM iperf.scheduler a 
+                        LEFT JOIN iperf.sites b ON a.sites_id = b.id"""
             cursor.execute(query)
             data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            # dan = timedelta(seconds=500)
+            # print(dan)
+            start = []
+            end = []
+            for i in df['timee']:
+                val = str(i)
+                val_delta = str(i + timedelta(minutes=20))
+                # val = timedelta(i)
+                
+                start.append(str(i))
+                end.append(val_delta)
+            # print (wkt)
+            # df['waktu']=df['timee'].strftime("%H:%M:%S")
+            # print(df)
+            df['date']=now
+            df['start']=start
+            df['end']=end
             conn.close()
-            return data
+            return df.to_dict('records')
 
         except Exception as e:
             raise e

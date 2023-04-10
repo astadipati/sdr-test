@@ -97,8 +97,8 @@ def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: s
     return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
 
 @app.get("/api/v1/get-all-scheduler", tags=["Scheduler SDR"], status_code=200)
-def get_scheduler_paginate():
-    return paginate(sdr.get_scheduler_paginate())
+def get_scheduler():
+    return sdr.get_scheduler_paginate()
 
 @app.get("/api/v1/get-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
 def get_scheduler(id: int):
@@ -132,5 +132,5 @@ async def get_val_max_download_today(device_id: str):
 async def get_val_max_upload_today(device_id: str):
     return sdr.get_val_max_upload_today(device_id)
 
-add_pagination(app)
+# add_pagination(app)
 
