@@ -249,8 +249,6 @@ class Master_sdr(Config):
             cursor.execute(query)
             data = cursor.fetchall()
             df = pd.DataFrame(data)
-            # dan = timedelta(seconds=500)
-            # print(dan)
             start = []
             end = []
             for i in df['timee']:
@@ -260,9 +258,6 @@ class Master_sdr(Config):
                 
                 start.append(str(i))
                 end.append(val_delta)
-            # print (wkt)
-            # df['waktu']=df['timee'].strftime("%H:%M:%S")
-            # print(df)
             df['date']=now
             df['start']=start
             df['end']=end
@@ -285,9 +280,6 @@ class Master_sdr(Config):
             cursor.execute(query)
             data = cursor.fetchall()
             df = pd.DataFrame(data)
-            # dan = timedelta(seconds=500)
-            # print(dan)
-            # temp_fwd_rtn = df['tipe']
             start = []
             end = []
             val_fwd_rtn = []
@@ -308,7 +300,6 @@ class Master_sdr(Config):
             df['duration']=df['duration']
             df['fwd_rtn_selection']=val_fwd_rtn
             val = df.loc[:, ['id','date','start_time','terminal_id','duration','fwd_rtn_selection']]
-            # df['end']=end
             conn.close()
             return val.to_dict('records')
 
