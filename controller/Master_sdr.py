@@ -26,12 +26,13 @@ class Master_sdr(Config):
             raise e
         
     def del_mini_pc(self, id):
+        
         try:
             date = datetime.now()
             date = date.replace(microsecond=0)
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"DELETE FROM iperf.sites WHERE id={id}" 
+            query = f"DELETE FROM iperf.sites WHERE id='{id}'"
             cursor.execute(query)
             conn.commit()
             conn.close()
