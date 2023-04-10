@@ -304,12 +304,11 @@ class Master_sdr(Config):
             for n in do_up:
                 if n=="d":
                     # print("forward")
-                    val_fwd_rtn.append("forward")
+                    val_fwd_rtn.append("FWD")
                 else:
-                    val_fwd_rtn.append("return")
+                    val_fwd_rtn.append("RTN")
                     # print("return")                    
                 
-            # do_up = "forward" if (do_up=="d") else "return"
             df['start_time']=start
             df['terminal_id']=df['name']
             df['duration']=df['duration']
