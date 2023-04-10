@@ -306,7 +306,7 @@ class Master_sdr(Config):
             df['terminal_id']=df['name']
             df['duration']=df['duration']
             df['fwd_rtn_selection']=val_fwd_rtn
-            val = df.loc[:, ['start_time','terminal_id','duration','fwd_rtn_selection']]
+            val = df.loc[:, ['id','start_time','terminal_id','duration','fwd_rtn_selection']]
             # df['end']=end
             conn.close()
             return val.to_dict('records')
