@@ -294,20 +294,13 @@ class Master_sdr(Config):
             for i in df['timee']:
                 # print(str(i)[7:-3])
                 start.append(str(i)[7:-3])
-                # end.append(val_delta)
-            # print (wkt)
-            # df['waktu']=df['timee'].strftime("%H:%M:%S")
-            # print(df)
-            # df['date']=now
             do_up = df['tipe']
             val_fwd_rtn = []
             for n in do_up:
                 if n=="d":
-                    # print("forward")
                     val_fwd_rtn.append("FWD")
                 else:
                     val_fwd_rtn.append("RTN")
-                    # print("return")                    
                 
             df['start_time']=start
             df['terminal_id']=df['name']
