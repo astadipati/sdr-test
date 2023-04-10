@@ -100,6 +100,10 @@ def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: s
 def get_scheduler():
     return sdr.get_scheduler_paginate()
 
+@app.get("/api/v1/get-scheduler-kratos", tags=["Scheduler SDR"], status_code=200)
+def get_scheduler_concat():
+    return sdr.get_scheduler_kratos()
+
 @app.get("/api/v1/get-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
 def get_scheduler(id: int):
     return sdr.get_scheduler(id)
@@ -131,6 +135,3 @@ async def get_val_max_download_today(device_id: str):
 @app.get("/api/n5/max-upload/{device_id}", tags=["SDR Module"], status_code=200)
 async def get_val_max_upload_today(device_id: str):
     return sdr.get_val_max_upload_today(device_id)
-
-# add_pagination(app)
-

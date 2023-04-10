@@ -237,13 +237,13 @@ class Master_sdr(Config):
 
     def get_scheduler_paginate(self):
         now = datetime.now()
-        now = now.strftime("%H:%M:%S")
+        now = now.strftime("%Y-%m-%d")
         # now = now.replace(microsecond=0, second=0, minute=0, hour=0)
-        print(now)
+        # print(now)
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT b.id, b.name, a.timee, a.tipe, a.comments 
+            query = f"""SELECT b.id, b.name, b.duration, a.timee, a.tipe, a.comments 
                         FROM iperf.scheduler a 
                         LEFT JOIN iperf.sites b ON a.sites_id = b.id"""
             cursor.execute(query)
@@ -268,6 +268,56 @@ class Master_sdr(Config):
             df['end']=end
             conn.close()
             return df.to_dict('records')
+
+        except Exception as e:
+            raise e
+        
+    def get_scheduler_kratos(self):
+        now = datetime.now()
+        now = now.strftime("%Y-%m-%d")
+        
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""SELECT b.id, b.name, b.duration, a.timee, a.tipe, a.comments 
+                        FROM iperf.scheduler a 
+                        LEFT JOIN iperf.sites b ON a.sites_id = b.id"""
+            cursor.execute(query)
+            data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            # dan = timedelta(seconds=500)
+            # print(dan)
+            # temp_fwd_rtn = df['tipe']
+            start = []
+            end = []
+            val_fwd_rtn = []
+            for i in df['timee']:
+                # print(str(i)[7:-3])
+                start.append(str(i)[7:-3])
+                # end.append(val_delta)
+            # print (wkt)
+            # df['waktu']=df['timee'].strftime("%H:%M:%S")
+            # print(df)
+            # df['date']=now
+            do_up = df['tipe']
+            val_fwd_rtn = []
+            for n in do_up:
+                if n=="d":
+                    # print("forward")
+                    val_fwd_rtn.append("forward")
+                else:
+                    val_fwd_rtn.append("return")
+                    # print("return")                    
+                
+            # do_up = "forward" if (do_up=="d") else "return"
+            df['start_time']=start
+            df['terminal_id']=df['name']
+            df['duration']=df['duration']
+            df['fwd_rtn_selection']=val_fwd_rtn
+            val = df.loc[:, ['start_time','terminal_id','duration','fwd_rtn_selection']]
+            # df['end']=end
+            conn.close()
+            return val.to_dict('records')
 
         except Exception as e:
             raise e
