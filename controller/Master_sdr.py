@@ -301,12 +301,13 @@ class Master_sdr(Config):
                     val_fwd_rtn.append("FWD")
                 else:
                     val_fwd_rtn.append("RTN")
-                
+
+            df['date']=now                
             df['start_time']=start
             df['terminal_id']=df['name']
             df['duration']=df['duration']
             df['fwd_rtn_selection']=val_fwd_rtn
-            val = df.loc[:, ['id','start_time','terminal_id','duration','fwd_rtn_selection']]
+            val = df.loc[:, ['id','date','start_time','terminal_id','duration','fwd_rtn_selection']]
             # df['end']=end
             conn.close()
             return val.to_dict('records')
