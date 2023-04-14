@@ -45,7 +45,7 @@ app.add_middleware(
 @app.post("/api/n5/add-mini-pc", tags=["SDR Module"], status_code=200)
 async def add_mini_pc(post: IsPostMiniPC):
     sdr.add_mini_pc(post)
-    return post
+    return {"status": "Success","data":post}
 
 
 @app.get("/api/v1/list-sites/", tags=["SDR Terminal Reference"], status_code=200)
@@ -85,7 +85,7 @@ def update_single_sites(id: int):
 # def update_single_sites(id: int, post: IsStatusUpdate):
 def update_mini_pc(id: int, post: IsStatusUpdate):
     sdr.update_mini_pc(id, post)
-    return {"status": "Success"}
+    return {"status": "Success", "data":post}
 
 
 @app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
