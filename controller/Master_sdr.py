@@ -161,7 +161,7 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status, sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"
+            query = f"SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.port_server, sites.ip_server,sites.status, sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
