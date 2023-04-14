@@ -85,7 +85,7 @@ def update_single_sites(id: int):
 # def update_single_sites(id: int, post: IsStatusUpdate):
 def update_mini_pc(id: int, post: IsStatusUpdate):
     sdr.update_mini_pc(id, post)
-    return ORJSONResponse([{"status": "Success"}])
+    return {"status": "Success"}
 
 
 @app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
