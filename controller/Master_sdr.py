@@ -218,7 +218,7 @@ class Master_sdr(Config):
             cursor.execute(query)
             conn.commit()
             conn.close()
-            return "ok"
+            return
 
         except Exception as e:
             raise e
