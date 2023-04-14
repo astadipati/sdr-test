@@ -1,5 +1,6 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
 from dotenv import dotenv_values
 from config.config import Config
 from controller.Master_sdr import Master_sdr
@@ -84,7 +85,7 @@ def update_single_sites(id: int):
 # def update_single_sites(id: int, post: IsStatusUpdate):
 def update_mini_pc(id: int, post: IsStatusUpdate):
     sdr.update_mini_pc(id, post)
-    return post
+    return ORJSONResponse([{"status": "Success"}])
 
 
 @app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
