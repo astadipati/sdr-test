@@ -6,7 +6,7 @@ from config.config import Config
 from controller.Master_sdr import Master_sdr
 from models.Client import IsStatusUpdate, IsPostMiniPC
 from models.Scheduler import IsScheduler
-from fastapi_pagination import Page, add_pagination, paginate
+# from fastapi_pagination import Page, add_pagination, paginate
 config = dotenv_values(".env")
 Cfx = Config(config)
 
