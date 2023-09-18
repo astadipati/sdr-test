@@ -42,8 +42,10 @@ class Master_sdr(Config):
         
     def get_status_port(self):
         try:
-
-            url = "http://192.168.1.220/flux/api/server/statusport"
+            url=self.config['URL']
+            print(url)
+            # http://202.95.150.42/
+            url = "http://202.95.150.42/flux/api/server/statusport"
 
             payload={}
             headers = {}
@@ -58,7 +60,7 @@ class Master_sdr(Config):
         start = time.time()
         print(ip_tr)
         try:
-            url = "http://192.168.1.220/flux/api/server/statusport"
+            url = "http://202.95.150.42/flux/api/server/statusport"
 
             payload={}
             headers = {}
@@ -135,7 +137,8 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,sites.status ,sites.updated_at from iperf.sites WHERE status = 1"
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,
+                        sites.status ,sites.updated_at from iperf.sites"""
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -227,7 +230,8 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b ON a.sites_id = b.id WHERE b.id = {id}"
+            query = f"""SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b 
+                        ON a.sites_id = b.id WHERE b.id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -313,7 +317,8 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"INSERT INTO iperf.scheduler (sites_id, tipe, timee, comments, date_created) VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.comments}','{now}')"
+            query = f"""INSERT INTO iperf.scheduler (sites_id, tipe, timee, comments, date_created) 
+                        VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.comments}','{now}')"""
             cursor.execute(query)
             conn.commit()
             conn.close()
@@ -328,7 +333,9 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"UPDATE iperf.scheduler SET sites_id={post.sites_id}, tipe='{post.tipe}', timee='{post.timee}', comments='{post.comments}', updated_at='{now}' WHERE id={id}"
+            query = f"""UPDATE iperf.scheduler SET 
+                        sites_id={post.sites_id}, tipe='{post.tipe}', timee='{post.timee}', comments='{post.comments}', 
+                        updated_at='{now}' WHERE id={id}"""
             cursor.execute(query)
             conn.commit()
             conn.close()
