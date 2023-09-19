@@ -8,8 +8,10 @@ import requests
 
 
 class Master_sdr(Config):
+    
     def __init__(self, cfg):
         self.cfx = Config(cfg)
+        
     def add_mini_pc(self, post):
         try:
             date = datetime.now()
@@ -41,11 +43,12 @@ class Master_sdr(Config):
             raise e
         
     def get_status_port(self):
+        uri = self.cfx.config['URL_SNT']
         try:
-            url=self.config['URL']
+            # url=self.config['URL']
             print(url)
             # http://202.95.150.42/
-            url = "http://202.95.150.42/flux/api/server/statusport"
+            url = uri+"/flux/api/server/statusport"
 
             payload={}
             headers = {}
@@ -59,8 +62,9 @@ class Master_sdr(Config):
     def download(self, uname, ip_tr, ip_server, port, time_processing):
         start = time.time()
         print(ip_tr)
+        uri = self.cfx.config['URL_SNT']
         try:
-            url = "http://202.95.150.42/flux/api/server/statusport"
+            url = uri+"/flux/api/server/statusport"
 
             payload={}
             headers = {}
@@ -135,14 +139,36 @@ class Master_sdr(Config):
 
     def get_sites_status_on(self):
         try:
+            
+            uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,
                         sites.status ,sites.updated_at from iperf.sites"""
             cursor.execute(query)
             data = cursor.fetchall()
-            conn.close()
-            return data
+            # conn.close()
+            df = pd.DataFrame(data)
+            # print(df)
+            
+            url = uri+"/flux/api/zabbix/status"
+
+            payload = {}
+            headers = {}
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            # print(res)
+            
+            temp = []
+            for i in res:
+                print(i['lastvalue'])
+                temp.append(i['lastvalue'])
+            df['status']=temp
+            to_dict = df.to_dict("records")
+            # print(df)
+
+            return to_dict
 
         except Exception as e:
             raise e
@@ -239,39 +265,8 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
-
-    def get_scheduler_paginate(self):
-        now = datetime.now()
-        now = now.strftime("%Y-%m-%d")
-        # now = now.replace(microsecond=0, second=0, minute=0, hour=0)
-        # print(now)
-        try:
-            conn = self.cfx.connectDB()
-            cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT b.id, b.name, b.duration, a.timee, a.tipe, a.comments 
-                        FROM iperf.scheduler a 
-                        LEFT JOIN iperf.sites b ON a.sites_id = b.id"""
-            cursor.execute(query)
-            data = cursor.fetchall()
-            df = pd.DataFrame(data)
-            start = []
-            end = []
-            for i in df['timee']:
-                val = str(i)
-                val_delta = str(i + timedelta(minutes=20))
-                # val = timedelta(i)
                 
-                start.append(str(i))
-                end.append(val_delta)
-            df['date']=now
-            df['start']=start
-            df['end']=end
-            conn.close()
-            return df.to_dict('records')
-
-        except Exception as e:
-            raise e
-        
+    # ini akan kebaca buat scheduler
     def get_scheduler_kratos(self):
         now = datetime.now()
         now = now.strftime("%Y-%m-%d")
