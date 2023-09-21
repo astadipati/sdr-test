@@ -160,7 +160,7 @@ class Master_sdr(Config):
             
             temp = []
             for i in res:
-                print(i['lastvalue'])
+                # print(i['lastvalue'])
                 temp.append(i['lastvalue'])
             df['status']=temp
             to_dict = df.to_dict("records")
@@ -180,6 +180,43 @@ class Master_sdr(Config):
             data = cursor.fetchall()
             conn.close()
             return data
+
+        except Exception as e:
+            raise e
+        
+    def get_tr_on(self):
+        try:
+            
+            uri = self.cfx.config['URL_SNT']
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,
+                        sites.status, sites.bitrate, sites.duration ,sites.updated_at from iperf.sites"""
+            cursor.execute(query)
+            data = cursor.fetchall()
+            # conn.close()
+            df = pd.DataFrame(data)
+            # print(df)
+            
+            url = uri+"/flux/api/zabbix/status"
+
+            payload = {}
+            headers = {}
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            # print(res)
+            
+            temp = []
+            for i in res:
+                # print(i['lastvalue'])
+                temp.append(i['lastvalue'])
+            df['status']=temp
+            tf = df.loc[df['status'].isin(['1'])]
+            to_dict = tf.to_dict("records")
+            # print(df)
+
+            return to_dict
 
         except Exception as e:
             raise e
@@ -243,7 +280,7 @@ class Master_sdr(Config):
             cursor = conn.cursor(dictionary=True)
             # query = f"UPDATE iperf.sites SET {post}, updated_at = '{now}' WHERE id = {id}"
             query = f"UPDATE iperf.sites SET status='{post}', updated_at = '{now}' WHERE id = {id}"
-            print(query)
+            # print(query)
             cursor.execute(query)
             conn.commit()
             conn.close()
