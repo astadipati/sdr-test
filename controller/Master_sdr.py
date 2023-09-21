@@ -43,11 +43,9 @@ class Master_sdr(Config):
             raise e
         
     def get_status_port(self):
-        uri = self.cfx.config['URL_SNT']
         try:
-            # url=self.config['URL']
+            uri = self.cfx.config['URL_SNT']
             print(url)
-            # http://202.95.150.42/
             url = uri+"/flux/api/server/statusport"
 
             payload={}
@@ -62,8 +60,8 @@ class Master_sdr(Config):
     def download(self, uname, ip_tr, ip_server, port, time_processing):
         start = time.time()
         print(ip_tr)
-        uri = self.cfx.config['URL_SNT']
         try:
+            uri = self.cfx.config['URL_SNT']
             url = uri+"/flux/api/server/statusport"
 
             payload={}
@@ -186,16 +184,54 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
+    # used for detil
     def get_single_sites(self, id):
         try:
+            uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.port_server, sites.ip_server,sites.status, sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"
+            query = f"""SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.port_server, sites.ip_server,sites.status,
+                        sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
+            # print(data)
+            # df = pd.DataFrame(data)
+            id_mini = data[0]['id']
+            sbc = data[0]['subscriber_number']
+            name = data[0]['name']
+            user = data[0]['user']
+            ip = data[0]['ip']
+            port_server = data[0]['port_server']
+            ip_server = data[0]['ip_server']
+            duration = data[0]['duration']
+            # df = pd.DataFrame(data)
+            # print(df)
             conn.close()
-            return data
-
+            
+            url = uri+"/flux/api/zabbix/status"
+            payload = {}
+            headers = {}
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            df = pd.DataFrame(res)
+            # print(df)
+            status = df.loc[df['ip']==ip]
+            stat = int(status['lastvalue'])
+            print(stat)
+            # print(df['status']==status)
+            # print(status)
+            return {
+                "id": id_mini,
+                "subscriber_number":sbc,
+                "name":name,
+                "user":user,
+                "ip":ip,
+                "port_server":port_server,
+                "ip_server":ip_server,
+                "status":stat,
+                "duration":duration
+            }
+            
         except Exception as e:
             raise e
 
