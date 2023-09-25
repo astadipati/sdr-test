@@ -245,13 +245,17 @@ class Master_sdr(Config):
             res = response.json()
             # print(res)
             df = pd.DataFrame(res)
-            print(df)
+            # print(df['lastvalue'])
             temp = []
             for i in range(len(df['ip'])):
                 ip = df['ip'][i]
                 # print(ip)
                 status = int(df['lastvalue'][i])
-                # print(status)
+                print(status)
+                # if status == 1:
+                #     temp.append(status)
+                # else:
+                #     pass
                 # return 8
                 query = f"""UPDATE iperf.sites 
                             SET status = {status}
