@@ -186,18 +186,22 @@ class Master_sdr(Config):
         
     def get_tr_on(self):
         try:
-            
+            now = datetime.now()
+            now = now.replace(microsecond=0, second=0)
+            now = now.strftime("%H:%M:%S")
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,
-                        sites.status, sites.bitrate, sites.duration ,sites.updated_at from iperf.sites"""
+            query = """SELECT a.id, a.subscriber_number, a.name, a.ip, a.port_server, a.ip_server, a.status, a.bitrate, a.duration, b.timee, a.updated_at 
+                    from iperf.sites a
+                    left join iperf.scheduler b on a.id = b.sites_id 
+                    """
             cursor.execute(query)
             data = cursor.fetchall()
             # conn.close()
             df = pd.DataFrame(data)
-            # print(df)
-            
+            print(df)
+            # return 9
             url = uri+"/flux/api/zabbix/status"
 
             payload = {}
@@ -213,10 +217,52 @@ class Master_sdr(Config):
                 temp.append(i['lastvalue'])
             df['status']=temp
             tf = df.loc[df['status'].isin(['1'])]
-            to_dict = tf.to_dict("records")
+            print(tf)
+            # to_dict = tf.to_dict("records")
             # print(df)
 
-            return to_dict
+            return "to_dict"
+
+        except Exception as e:
+            raise e
+        
+    # update status tr
+    def put_tr_status(self):
+        try:
+            now = datetime.now()
+            now = now.replace(microsecond=0, second=0)
+            now = now.strftime("%H:%M:%S")
+            uri = self.cfx.config['URL_SNT']
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            
+            # print(df)
+            # return 9
+            url = uri+"/flux/api/zabbix/status"
+            payload = {}
+            headers = {}
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            # print(res)
+            df = pd.DataFrame(res)
+            print(df)
+            temp = []
+            for i in range(len(df['ip'])):
+                ip = df['ip'][i]
+                # print(ip)
+                status = int(df['lastvalue'][i])
+                # print(status)
+                # return 8
+                query = f"""UPDATE iperf.sites 
+                            SET status = {status}
+                            WHERE ip='{ip}'"""
+                
+                cursor.execute(query)
+                conn.commit()
+                # conn.close()
+                # temp.append(ip)
+            
+            return temp
 
         except Exception as e:
             raise e

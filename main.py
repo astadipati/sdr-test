@@ -62,6 +62,10 @@ def get_list_on():
 def get_tr_on():
     return sdr.get_tr_on()
 
+@app.get("/api/v1/update-tr-status/", tags=["SDR Terminal Reference"], status_code=200)
+def update_tr_status():
+    return sdr.put_tr_status()
+
 
 @app.get("/api/v1/status-off/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_off():
