@@ -148,22 +148,50 @@ class Master_sdr(Config):
             # conn.close()
             df = pd.DataFrame(data)
             # print(df)
+            # status = df['status']
+            st = []
+            for i in range(len(df['status'])):
+                t = df['status'][i]
+                if t == 1:
+                    st.append("Active")
+                else:
+                    st.append("Not Active")
+            # return st
+            df['status'] = st
             
-            url = uri+"/flux/api/zabbix/status"
+            # url = uri+"/flux/api/zabbix/status"
+
+            # payload = {}
+            # headers = {}
+
+            # response = requests.request("GET", url, headers=headers, data=payload)
+            # res = response.json()
+            # print(res)
+            
+            # temp = []
+            # for i in res:
+            #     # print(i['lastvalue'])
+            #     temp.append(i['lastvalue'])
+            # df['status']=temp
+            # # to_dict = df.to_dict("records")
+            
+            # # status port
+            url = "http://202.95.150.42/flux/api/server/statusport"
 
             payload = {}
             headers = {}
 
-            response = requests.request("GET", url, headers=headers, data=payload)
-            res = response.json()
-            # print(res)
-            
-            temp = []
-            for i in res:
-                # print(i['lastvalue'])
-                temp.append(i['lastvalue'])
-            df['status']=temp
-            to_dict = df.to_dict("records")
+            r = requests.request("GET", url, headers=headers, data=payload)
+            r = r.json()
+            # print(r.text)
+            temp_statusport = []
+            for j in r:
+                temp_statusport.append(j['status_port'])
+            df['status_port']=temp_statusport
+            # print(df)
+            val = df.loc[:, ['id','subscriber_number','name','ip','port_server','status_port','status','updated_at']]
+            # df = df.loc[:,'id']
+            to_dict = val.to_dict("records")
             # print(df)
 
             return to_dict
