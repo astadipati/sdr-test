@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import subprocess
 import requests
+import json
 
 
 
@@ -141,7 +142,7 @@ class Master_sdr(Config):
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.port_server, sites.ip_server,
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.ip_server, sites.port_server, sites.ip_server,
                         sites.status ,sites.updated_at from iperf.sites"""
             cursor.execute(query)
             data = cursor.fetchall()
@@ -159,21 +160,53 @@ class Master_sdr(Config):
             # return st
             df['status'] = st
             
-            # url = uri+"/flux/api/zabbix/status"
+            # # status port
+            url = "http://202.95.150.42/flux/api/server/statusport"
 
-            # payload = {}
-            # headers = {}
+            payload = {}
+            headers = {}
 
-            # response = requests.request("GET", url, headers=headers, data=payload)
-            # res = response.json()
-            # print(res)
+            r = requests.request("GET", url, headers=headers, data=payload)
+            r = r.json()
+            # print(r.text)
+            temp_statusport = []
+            for j in r:
+                temp_statusport.append(j['status_port'])
+            df['status_port']=temp_statusport
+            # print(df)
+            val = df.loc[:, ['id','subscriber_number','name','ip','ip_server', 'port_server','status_port','status','updated_at']]
+            # df = df.loc[:,'id']
+            to_dict = val.to_dict("records")
+            # print(df)
+
+            return to_dict
+
+        except Exception as e:
+            raise e
+        
+    def get_sites_active(self):
+        try:
             
-            # temp = []
-            # for i in res:
-            #     # print(i['lastvalue'])
-            #     temp.append(i['lastvalue'])
-            # df['status']=temp
-            # # to_dict = df.to_dict("records")
+            uri = self.cfx.config['URL_SNT']
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.ip_server, sites.port_server, sites.ip_server,
+                        sites.status ,sites.updated_at from iperf.sites where sites.status=1"""
+            cursor.execute(query)
+            data = cursor.fetchall()
+            # conn.close()
+            df = pd.DataFrame(data)
+            # print(df)
+            # status = df['status']
+            st = []
+            for i in range(len(df['status'])):
+                t = df['status'][i]
+                if t == 1:
+                    st.append("Active")
+                else:
+                    st.append("Not Active")
+            # return st
+            df['status'] = st
             
             # # status port
             url = "http://202.95.150.42/flux/api/server/statusport"
@@ -189,7 +222,7 @@ class Master_sdr(Config):
                 temp_statusport.append(j['status_port'])
             df['status_port']=temp_statusport
             # print(df)
-            val = df.loc[:, ['id','subscriber_number','name','ip','port_server','status_port','status','updated_at']]
+            val = df.loc[:, ['id','subscriber_number','name','ip','ip_server', 'port_server','status_port','status','updated_at']]
             # df = df.loc[:,'id']
             to_dict = val.to_dict("records")
             # print(df)
@@ -305,7 +338,7 @@ class Master_sdr(Config):
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.port_server, sites.ip_server,sites.status,
+            query = f"""SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.ip_server, sites.port_server, sites.ip_server,sites.status,
                         sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
@@ -318,35 +351,192 @@ class Master_sdr(Config):
             ip = data[0]['ip']
             port_server = data[0]['port_server']
             ip_server = data[0]['ip_server']
+            if data[0]['status']==1:
+                status="Active"
+            else:
+                status="Not Active"
             duration = data[0]['duration']
             # df = pd.DataFrame(data)
             # print(df)
             conn.close()
             
-            url = uri+"/flux/api/zabbix/status"
+            url = "http://202.95.150.42/flux/api/server/statusport"
+
             payload = {}
             headers = {}
-            response = requests.request("GET", url, headers=headers, data=payload)
-            res = response.json()
-            df = pd.DataFrame(res)
-            # print(df)
-            status = df.loc[df['ip']==ip]
-            stat = int(status['lastvalue'])
-            print(stat)
-            # print(df['status']==status)
-            # print(status)
+
+            r = requests.request("GET", url, headers=headers, data=payload)
+            r = r.json()
+            # print(r)
+            # print(ip)
+            temp_statusport = []
+            for j in r:
+                if j['ip']==ip:
+                    temp_statusport.append(j['status_port'])
+                else:
+                    pass
+            # print(temp_statusport[0])
+           
             return {
                 "id": id_mini,
                 "subscriber_number":sbc,
                 "name":name,
                 "user":user,
                 "ip":ip,
-                "port_server":port_server,
                 "ip_server":ip_server,
-                "status":stat,
+                "port_server":port_server,
+                "status_port":temp_statusport[0],
+                "status":status,
                 "duration":duration
             }
             
+        except Exception as e:
+            raise e
+        
+    def get_single_chart(self, id):
+        # now = datetime.now()
+        # now = now.strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""SELECT sites.id, sites.ip from iperf.sites WHERE id = {id}"""
+            cursor.execute(query)
+            data = cursor.fetchall()
+            ip = data[0]['ip']
+            conn.close()
+            
+            date = datetime.now()
+
+            delta = date - timedelta(hours=5)
+
+            selisih = date - delta
+            # print("selisih: ", selisih)
+
+            # print("delta: ",delta)
+            st_date = str(delta.replace(microsecond=0))
+
+            dt_timestamp = int(time.mktime(datetime.strptime(st_date, "%Y-%m-%d %H:%M:%S").timetuple()))
+            # print(dt_timestamp)
+
+            url = "http://202.95.150.42/zabbix/api_jsonrpc.php"
+
+            payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "user.login",
+            "params": {
+                "user": "edy",
+                "password": "Kul0nuwun"
+            },
+            "id": "1"
+            })
+            headers = {
+            'Content-Type': 'application/json'
+            }
+
+            # get itemid
+            response = requests.request("POST", url, headers=headers, data=payload)
+            data = response.json()
+            token = data['result']
+            # get download id
+            payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "item.get",
+            "params": {
+                    "output": ["itemid","key_","lastvalue","lastclock"],
+                    "host" : ip,
+                    "filter": {
+                        "key_": ["net.if.in[\"eth0\"]","net.if.out[\"eth0\"]"]
+                    },
+                    "sortfield": "name"
+                },
+            "auth": token,
+            "id": 1
+            })
+            headers = {
+            'Content-Type': 'application/json'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            data = response.json()
+            result = data['result']
+            # print(result)
+            df = pd.DataFrame(result)
+            # get itemid for download and upload
+            download_id = df['itemid'][0]
+            upload_id = df['itemid'][1]
+
+            # get history download
+            payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "history.get",
+            "params": {
+                "output": "extend",
+                "history": 3,
+                "itemids": download_id,
+                "sortfield": "clock",
+                "sortorder": "ASC",
+                "time_from": dt_timestamp
+            },
+            "auth": token,
+            "id": 1
+            })
+            headers = {
+            'Content-Type': 'application/json'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            data = response.json()
+            res_download = data['result']
+            temp_download = []
+            for j in res_download:
+                val_do = (int(j['value']))/1000
+            # print(to)
+                temp_download.append(val_do)
+            # print(temp_download)
+            # exit()
+            df2 = pd.DataFrame(res_download)
+            # print(res_download)
+            temp_time = []
+            for k in res_download:
+                cl = int(k['clock'])
+                to_obj = datetime.fromtimestamp(cl)
+            #   # print(to_obj)
+                temp_time.append(to_obj)
+            df2['val_download']=temp_download
+            df2['time']=temp_time
+            # temp_download
+            # temp_time
+            # get history upload
+            payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "history.get",
+            "params": {
+                "output": "extend",
+                "history": 3,
+                "itemids": upload_id,
+                "sortfield": "clock",
+                "sortorder": "ASC",
+                "time_from": dt_timestamp
+            },
+            "auth": token,
+            "id": 1
+            })
+            headers = {
+            'Content-Type': 'application/json'
+            }
+
+            r2 = requests.request("POST", url, headers=headers, data=payload)
+            data_upload = r2.json()
+            res_upload = data_upload['result']
+            temp_upload = []
+            for u in res_upload:
+                val_up = (int(u['value']))/1000
+            # print(to)
+                temp_upload.append(val_up)
+            df2['val_upload']=temp_upload
+            df2 = df2.loc[:,['val_download','val_upload','time']]
+            return df2.to_dict("records")
+
         except Exception as e:
             raise e
 

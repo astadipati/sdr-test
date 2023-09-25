@@ -57,6 +57,10 @@ def get_list():
 def get_list_on():
     return sdr.get_sites_status_on()
 
+# @app.get("/api/v1/status-active/", tags=["SDR Terminal Reference"], status_code=200)
+# def get_list_active():
+    # return sdr.get_sites_active()
+
 
 @app.get("/api/v1/tr-on/", tags=["SDR Terminal Reference"], status_code=200)
 def get_tr_on():
@@ -76,6 +80,9 @@ def get_list_off():
 def get_single_sites(id: int):
     return sdr.get_single_sites(id)
 
+@app.get("/api/v1/terminal-chart/{id}", tags=["SDR Terminal Reference"], status_code=200)
+def get_single_chart(id: int):
+    return sdr.get_single_chart(id)
 
 @app.get("/api/v1/terminal-update-status/{id}/{post}", tags=["SDR Terminal Reference"], status_code=200)
 # def update_single_sites(id: int, post: IsStatusUpdate):
