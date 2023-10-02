@@ -104,12 +104,12 @@ def update_mini_pc(id: int, post: IsStatusUpdate):
     return {"status": "Success"}
 
 
-@app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
+@app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
 def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
     return sdr.download(uname, ip_tr, ip_server, port, time_processing)
 
 
-@app.post("/api/v1/upload-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Do Test SDR"], status_code=200)
+@app.post("/api/v1/upload-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
 def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
     return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
 
