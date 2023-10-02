@@ -161,7 +161,7 @@ class Master_sdr(Config):
             df['status'] = st
             
             # # status port
-            url = "http://202.95.150.42/flux/api/server/statusport"
+            url = uri+"/flux/api/server/statusport"
 
             payload = {}
             headers = {}
@@ -209,7 +209,7 @@ class Master_sdr(Config):
             df['status'] = st
             
             # # status port
-            url = "http://202.95.150.42/flux/api/server/statusport"
+            url = uri+"/flux/api/server/statusport"
 
             payload = {}
             headers = {}
@@ -360,7 +360,7 @@ class Master_sdr(Config):
             # print(df)
             conn.close()
             
-            url = "http://202.95.150.42/flux/api/server/statusport"
+            url = uri+"/flux/api/server/statusport"
 
             payload = {}
             headers = {}
@@ -397,6 +397,7 @@ class Master_sdr(Config):
         # now = datetime.now()
         # now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
+            uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             query = f"""SELECT sites.id, sites.ip from iperf.sites WHERE id = {id}"""
@@ -418,7 +419,7 @@ class Master_sdr(Config):
             dt_timestamp = int(time.mktime(datetime.strptime(st_date, "%Y-%m-%d %H:%M:%S").timetuple()))
             # print(dt_timestamp)
 
-            url = "http://202.95.150.42/zabbix/api_jsonrpc.php"
+            url = uri+"/zabbix/api_jsonrpc.php"
 
             payload = json.dumps({
             "jsonrpc": "2.0",
