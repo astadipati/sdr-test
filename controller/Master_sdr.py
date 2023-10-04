@@ -408,7 +408,7 @@ class Master_sdr(Config):
             
             date = datetime.now()
 
-            delta = date - timedelta(hours=5)
+            delta = date - timedelta(hours=1)
 
             selisih = date - delta
             # print("selisih: ", selisih)
