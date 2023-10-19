@@ -59,11 +59,23 @@ class Master_sdr(Config):
             raise e
 
     def download(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
-        start = time.time()
-        print(ip_tr)
+        # start = time.time()
+        print(type(terminal_id))
         try:
-            date = datetime.now()
-            date = date.replace(microsecond=0)
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # date = date.replace(microsecond=0)
+            # print(type(date))
+            # print(type(time_processing))
+            rtn = "RTN"
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                        VALUES('{terminal_id}','{date}','{time_processing}','{rtn}') """
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            # return "OK"
+            
             uri = self.cfx.config['URL_SNT']
             url = uri+"/flux/api/server/statusport"
 
@@ -88,17 +100,18 @@ class Master_sdr(Config):
                     "data": {
                         "Name":uname,
                         "Port":port,
-                        "Time":time_processing,
-                        "Executed": "%s seconds" % (time.time() - start)
+                        "Time":time_processing
+                        # "Executed": "%s seconds" % (time.time() - start)
                     }
                 }
-                conn = self.cfx.connectDB()
-                cursor = conn.cursor(dictionary=True)
-                query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-                VALUES('{terminal_id}','{date}','{time_processing}','RTN' """
-                cursor.execute(query)
-                conn.commit()
-                conn.close()
+                # conn = self.cfx.connectDB()
+                # cursor = conn.cursor(dictionary=True)
+                # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                #         VALUES('{terminal_id}','{date}','{time_processing}','RTN' """
+                # cursor.execute(query)
+                # conn.commit()
+                # conn.close()
+                return info
             else:
                 info = {
                     "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
