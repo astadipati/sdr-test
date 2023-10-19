@@ -104,14 +104,14 @@ def update_mini_pc(id: int, post: IsStatusUpdate):
     return {"status": "Success"}
 
 
-@app.post("/api/v1/download-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
-def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
-    return sdr.download(uname, ip_tr, ip_server, port, time_processing)
+@app.post("/api/v1/download-test/{terminal_id}&{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
+def dothis(terminal_id: str, uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
+    return sdr.download(terminal_id, uname, ip_tr, ip_server, port, time_processing)
 
 
-@app.post("/api/v1/upload-test/{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
-def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
-    return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
+@app.post("/api/v1/upload-test/{terminal_id}&{uname}&{ip_tr}&{ip_server}&{port}&{time_processing}", tags=["Direct Test SDR"], status_code=200)
+def dothis(terminal_id: str, uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
+    return sdr.upload(terminal_id, uname, ip_tr, ip_server, port, time_processing)
 
 # scheduler
 @app.get("/api/v1/get-all-scheduler", tags=["Scheduler SDR"], status_code=200)

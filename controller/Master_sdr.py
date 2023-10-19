@@ -58,10 +58,12 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
-    def download(self, uname, ip_tr, ip_server, port, time_processing):
+    def download(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
         start = time.time()
         print(ip_tr)
         try:
+            date = datetime.now()
+            date = date.replace(microsecond=0)
             uri = self.cfx.config['URL_SNT']
             url = uri+"/flux/api/server/statusport"
 
@@ -90,6 +92,13 @@ class Master_sdr(Config):
                         "Executed": "%s seconds" % (time.time() - start)
                     }
                 }
+                conn = self.cfx.connectDB()
+                cursor = conn.cursor(dictionary=True)
+                query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                VALUES('{terminal_id}','{date}','{time_processing}','RTN' """
+                cursor.execute(query)
+                conn.commit()
+                conn.close()
             else:
                 info = {
                     "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
@@ -105,7 +114,7 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
-    def upload(self, uname, ip_tr, ip_server, port, time_processing):
+    def upload(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
 
@@ -121,6 +130,15 @@ class Master_sdr(Config):
                 "Executed": "%s seconds" % (time.time() - start)
             }
         }
+        date = datetime.now()
+        date = date.replace(microsecond=0)
+        conn = self.cfx.connectDB()
+        cursor = conn.cursor(dictionary=True)
+        query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+        VALUES('{terminal_id}','{date}','{time_processing}','FWD' """
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
         return info
 
     def get_sites(self):
