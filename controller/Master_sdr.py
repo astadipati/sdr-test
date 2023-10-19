@@ -654,8 +654,8 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""INSERT INTO iperf.scheduler (sites_id, tipe, timee, comments, date_created) 
-                        VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.comments}','{now}')"""
+            query = f"""INSERT INTO iperf.scheduler (sites_id, tipe, timee, duration, date_created) 
+                        VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.duration}','{now}')"""
             cursor.execute(query)
             conn.commit()
             conn.close()
@@ -671,7 +671,7 @@ class Master_sdr(Config):
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             query = f"""UPDATE iperf.scheduler SET 
-                        sites_id={post.sites_id}, tipe='{post.tipe}', timee='{post.timee}', comments='{post.comments}', 
+                        sites_id={post.sites_id}, tipe='{post.tipe}', timee='{post.timee}', duration='{post.duration}', 
                         updated_at='{now}' WHERE id={id}"""
             cursor.execute(query)
             conn.commit()

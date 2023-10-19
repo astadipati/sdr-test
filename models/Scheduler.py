@@ -5,4 +5,4 @@ class IsScheduler(BaseModel):
     sites_id: str
     tipe: str
     timee: str
-    comments: str
+    duration: str
