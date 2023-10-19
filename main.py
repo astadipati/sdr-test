@@ -113,9 +113,10 @@ def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: s
 def dothis(uname: str, ip_tr: str, ip_server: str, port: str, time_processing: str):
     return sdr.upload(uname, ip_tr, ip_server, port, time_processing)
 
+# scheduler
 @app.get("/api/v1/get-all-scheduler", tags=["Scheduler SDR"], status_code=200)
-def get_scheduler():
-    return sdr.get_scheduler_paginate()
+def get_scheduler_all():
+    return sdr.get_scheduler_all()
 
 @app.get("/api/v1/get-scheduler-kratos", tags=["Scheduler SDR"], status_code=200)
 def get_scheduler_concat():

@@ -593,12 +593,25 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
+        
+    def get_scheduler_all(self):
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""SELECT b.id, a.timee, a.tipe, a.duration FROM iperf.scheduler a LEFT JOIN iperf.sites b 
+                        ON a.sites_id = b.id """
+            cursor.execute(query)
+            data = cursor.fetchall()
+            conn.close()
+            return data
+        except Exception as e:
+            raise e
 
     def get_scheduler(self, id):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT b.id, a.timee, a.tipe, a.comments FROM iperf.scheduler a LEFT JOIN iperf.sites b 
+            query = f"""SELECT b.id, a.timee, a.tipe, a.duration FROM iperf.scheduler a LEFT JOIN iperf.sites b 
                         ON a.sites_id = b.id WHERE b.id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
