@@ -144,6 +144,10 @@ def delete_scheduler(id: str):
     sdr.delete_scheduler(id)
     return "Sukses Deleted"
 
+@app.get("/api/v1/log-kratos", tags=["SDR Module"], status_code=200)
+async def get_log_kratos():
+    return sdr.data_log()
+
 
 @app.get("/api/n5/max-download/{device_id}", tags=["SDR Module"], status_code=200)
 async def get_val_max_download_today(device_id: str):

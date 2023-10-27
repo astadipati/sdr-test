@@ -173,8 +173,10 @@ class Master_sdr(Config):
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.ip_server, sites.port_server, sites.ip_server,
-                        sites.status ,sites.updated_at from iperf.sites"""
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, (s.ip)as ip_server , 
+                        sites.port_server, sites.status ,sites.updated_at 
+                        from iperf.sites
+                        left join iperf.servers s on sites.ip_server = s.id """
             cursor.execute(query)
             data = cursor.fetchall()
             # conn.close()
@@ -369,8 +371,11 @@ class Master_sdr(Config):
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT sites.id, sites.subscriber_number, sites.name, sites.user,sites.ip, sites.ip_server, sites.port_server, sites.ip_server,sites.status,
-                        sites.duration ,sites.updated_at from iperf.sites WHERE id = {id}"""
+            query = f"""SELECT a.id, a.subscriber_number, a.name, a.user,a.ip, (s.ip) as ip_server, a.port_server,a.status,
+                        a.duration ,a.updated_at 
+                        from iperf.sites a
+                        left join iperf.servers s on a.ip_server = s.id 
+                        WHERE a.id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
             # print(data)
@@ -807,6 +812,20 @@ class Master_sdr(Config):
             df['date_created'] = datetime.now().replace(second=0, microsecond=0)
             df = pd.DataFrame.max(df)
             data = df.to_dict()
+            return data
+
+        except Exception as e:
+            raise e
+    
+    def data_log(self):
+
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT * FROM iperf.log_kratos"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            conn.close()
             return data
 
         except Exception as e:
