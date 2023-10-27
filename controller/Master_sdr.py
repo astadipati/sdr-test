@@ -59,7 +59,7 @@ class Master_sdr(Config):
             raise e
 
     def download(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
-        # start = time.time()
+        start = time.time()
         print(type(terminal_id))
         try:
             date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -166,17 +166,21 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
-
+        
+    # minion for mini list
     def get_sites_status_on(self):
         try:
             
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, (s.ip)as ip_server , 
+            # query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, (s.ip)as ip_server , 
+            #             sites.port_server, sites.status ,sites.updated_at 
+            #             from iperf.sites
+            #             left join iperf.servers s on sites.ip_server = s.id """
+            query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.ip_server , 
                         sites.port_server, sites.status ,sites.updated_at 
-                        from iperf.sites
-                        left join iperf.servers s on sites.ip_server = s.id """
+                        from iperf.sites """
             cursor.execute(query)
             data = cursor.fetchall()
             # conn.close()
