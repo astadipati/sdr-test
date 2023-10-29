@@ -375,11 +375,15 @@ class Master_sdr(Config):
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT a.id, a.subscriber_number, a.name, a.user,a.ip, (s.ip) as ip_server, a.port_server,a.status,
-                        a.duration ,a.updated_at 
-                        from iperf.sites a
-                        left join iperf.servers s on a.ip_server = s.id 
-                        WHERE a.id = {id}"""
+            query = f"""SELECT a.id, a.subscriber_number, a.name, a.user,a.ip, a.ip_server, a.port_server,a.status,
+                         a.duration ,a.updated_at 
+                         from iperf.sites a
+                         WHERE a.id = {id}"""
+            # query = f"""SELECT a.id, a.subscriber_number, a.name, a.user,a.ip, (s.ip) as ip_server, a.port_server,a.status,
+            #             a.duration ,a.updated_at 
+            #             from iperf.sites a
+            #             left join iperf.servers s on a.ip_server = s.id 
+            #             WHERE a.id = {id}"""
             cursor.execute(query)
             data = cursor.fetchall()
             # print(data)

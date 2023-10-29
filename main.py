@@ -52,7 +52,7 @@ async def add_mini_pc(post: IsPostMiniPC):
 def get_list():
     return sdr.get_sites()
 
-
+# used for cek mini ON
 @app.get("/api/v1/status-on/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_on():
     return sdr.get_sites_status_on()
@@ -75,7 +75,7 @@ def update_tr_status():
 def get_list_off():
     return sdr.get_sites_status_off()
 
-
+# detil for sdr adhoc
 @app.get("/api/v1/terminal-detil/{id}", tags=["SDR Terminal Reference"], status_code=200)
 def get_single_sites(id: int):
     return sdr.get_single_sites(id)
