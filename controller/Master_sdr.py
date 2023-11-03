@@ -708,12 +708,17 @@ class Master_sdr(Config):
     def post_scheduler(self, post):
         now = datetime.now()
         now = now.replace(microsecond=0)
+        # print(post.sites_id)
+        # print(type(post.sites_id))
+        
+        # return 0
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             query = f"""INSERT INTO iperf.scheduler (sites_id, tipe, timee, duration, date_created) 
-                        VALUES({post.sites_id}, '{post.tipe}', '{post.timee}','{post.duration}','{now}')"""
+                        VALUES ('{post.sites_id}', '{post.tipe}', '{post.timee}','{post.duration}','{now}')"""
             cursor.execute(query)
+            # print(query)
             conn.commit()
             conn.close()
             return
