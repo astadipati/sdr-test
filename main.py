@@ -66,10 +66,14 @@ def get_list_on():
 def get_tr_on():
     return sdr.get_tr_on()
 
+# cron update status
 @app.get("/api/v1/update-tr-status/", tags=["SDR Terminal Reference"], status_code=200)
 def update_tr_status():
     return sdr.put_tr_status()
-
+# cron update status port
+@app.get("/api/v1/update-tr-status-port/", tags=["SDR Terminal Reference"], status_code=200)
+def update_tr_status_port():
+    return sdr.put_tr_statusport()
 
 @app.get("/api/v1/status-off/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_off():
@@ -80,6 +84,7 @@ def get_list_off():
 def get_single_sites(id: int):
     return sdr.get_single_sites(id)
 
+# chart oss
 @app.get("/api/v1/terminal-chart/{id}", tags=["SDR Terminal Reference"], status_code=200)
 def get_single_chart(id: int):
     return sdr.get_single_chart(id)

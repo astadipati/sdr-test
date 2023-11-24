@@ -179,14 +179,14 @@ class Master_sdr(Config):
             #             from iperf.sites
             #             left join iperf.servers s on sites.ip_server = s.id """
             query = """SELECT sites.id, sites.subscriber_number, sites.name, sites.ip, sites.ip_server , 
-                        sites.port_server, sites.status ,sites.updated_at 
+                        sites.port_server, sites.status , status_port,sites.updated_at 
                         from iperf.sites """
             cursor.execute(query)
             data = cursor.fetchall()
             # conn.close()
             df = pd.DataFrame(data)
             # print(df)
-            # status = df['status']
+            status = df['status']
             st = []
             for i in range(len(df['status'])):
                 t = df['status'][i]
@@ -197,19 +197,19 @@ class Master_sdr(Config):
             # return st
             df['status'] = st
             
-            # # status port
-            url = uri+"/flux/api/server/statusport"
+            # # # status port
+            # url = uri+"/flux/api/server/statusport"
 
-            payload = {}
-            headers = {}
+            # payload = {}
+            # headers = {}
 
-            r = requests.request("GET", url, headers=headers, data=payload)
-            r = r.json()
-            # print(r.text)
-            temp_statusport = []
-            for j in r:
-                temp_statusport.append(j['status_port'])
-            df['status_port']=temp_statusport
+            # r = requests.request("GET", url, headers=headers, data=payload)
+            # r = r.json()
+            # print(r)
+            # temp_statusport = []
+            # for j in r:
+            #     temp_statusport.append(j['status_port'])
+            # df['status_port']=temp_statusport
             # print(df)
             val = df.loc[:, ['id','subscriber_number','name','ip','ip_server', 'port_server','status_port','status','updated_at']]
             # df = df.loc[:,'id']
@@ -368,6 +368,46 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
+        
+    def put_tr_statusport(self):
+        try:
+            now = datetime.now()
+            now = now.replace(microsecond=0, second=0)
+            now = now.strftime("%H:%M:%S")
+            uri = self.cfx.config['URL_SNT']
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            
+            url = uri+"/flux/api/server/statusport"
+            payload = {}
+            headers = {}
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            # print(res)
+            df = pd.DataFrame(res)
+            # print(df['ip'])
+            # print(df['lastvalue'])
+            temp = []
+            for i in range(len(df['ip'])):
+                ip = df['ip'][i]
+                print(ip)
+                status_port = df['status_port'][i]
+                # print(type(status_port))
+            #     status = int(df['lastvalue'][i])
+            #     print(status)
+
+                query = f"""UPDATE iperf.sites 
+                            SET status_port = '{status_port}'
+                            WHERE ip='{ip}'"""
+                
+                cursor.execute(query)
+                conn.commit()
+            
+            return datetime.now()
+
+        except Exception as e:
+            raise e
+
 
     # used for detil
     def get_single_sites(self, id):
@@ -482,6 +522,7 @@ class Master_sdr(Config):
             response = requests.request("POST", url, headers=headers, data=payload)
             data = response.json()
             token = data['result']
+            print("token:",token)
             # get download id
             payload = json.dumps({
             "jsonrpc": "2.0",
@@ -506,6 +547,8 @@ class Master_sdr(Config):
             result = data['result']
             # print(result)
             df = pd.DataFrame(result)
+            # print(df)
+            # return 9
             # get itemid for download and upload
             download_id = df['itemid'][0]
             upload_id = df['itemid'][1]
@@ -642,8 +685,9 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT b.id, a.timee, a.tipe, a.duration FROM iperf.scheduler a LEFT JOIN iperf.sites b 
-                        ON a.sites_id = b.id """
+            query = f"""SELECT a.sites_id as id, a.timee, a.tipe, a.duration 
+                        FROM iperf.scheduler a LEFT JOIN iperf.sites b 
+                        ON a.sites_id = b.subscriber_number """
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -655,8 +699,9 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT b.id, a.timee, a.tipe, a.duration FROM iperf.scheduler a LEFT JOIN iperf.sites b 
-                        ON a.sites_id = b.id WHERE b.id = {id}"""
+            query = f"""(a.sites_id) as id , a.timee, a.tipe, a.duration 
+                        FROM iperf.scheduler a LEFT JOIN iperf.sites b 
+                        ON a.sites_id = b.subscriber_number"""
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
