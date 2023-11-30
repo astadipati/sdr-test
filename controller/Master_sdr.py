@@ -685,9 +685,10 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""SELECT a.sites_id as id, a.timee, a.tipe, a.duration 
+            query = f"""SELECT a.sites_id as id, DATE_FORMAT(a.timee, '%H:%i:%s')as timee, a.tipe, a.duration 
                         FROM iperf.scheduler a LEFT JOIN iperf.sites b 
-                        ON a.sites_id = b.subscriber_number """
+                        ON a.sites_id = b.subscriber_number 
+                        WHERE b.ip_modem is NOT NULL"""
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
@@ -699,9 +700,10 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"""(a.sites_id) as id , a.timee, a.tipe, a.duration 
+            query = f"""SELECT (a.sites_id) as id , DATE_FORMAT(a.timee, '%H:%i:%s')as timee, a.tipe, a.duration 
                         FROM iperf.scheduler a LEFT JOIN iperf.sites b 
-                        ON a.sites_id = b.subscriber_number"""
+                        ON a.sites_id = b.subscriber_number
+                        WHERE b.ip_modem is NOT NULL """
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
