@@ -85,9 +85,9 @@ def get_single_sites(id: int):
     return sdr.get_single_sites(id)
 
 # chart oss
-@app.get("/api/v1/terminal-chart/{id}", tags=["SDR Terminal Reference"], status_code=200)
-def get_single_chart(id: int):
-    return sdr.get_single_chart(id)
+@app.get("/api/v1/terminal-chart/{id}/{state}/{start_date}/{end_date}", tags=["SDR Terminal Reference"], status_code=200)
+def get_single_chart(id: int, state:str, start_date:str, end_date:str):
+    return sdr.get_single_chart(id, state, start_date, end_date)
 
 @app.get("/api/v1/terminal-update-status/{id}/{post}", tags=["SDR Terminal Reference"], status_code=200)
 # def update_single_sites(id: int, post: IsStatusUpdate):

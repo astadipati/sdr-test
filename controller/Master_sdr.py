@@ -477,10 +477,18 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
         
-    def get_single_chart(self, id):
+    def get_single_chart(self, id, state, start_date, end_date):
         # now = datetime.now()
         # now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
+            start_date = str(start_date + " 00:00:00")
+            end_date = str(end_date+" 11:59:59")
+          
+            st_timestamp = int(time.mktime(datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S").timetuple()))
+            # print("st_timestamp", st_timestamp)
+            dt_timestamp = int(time.mktime(datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S").timetuple()))
+            # print("end_date",dt_timestamp)
+            
             uri = self.cfx.config['URL_SNT']
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
@@ -489,19 +497,6 @@ class Master_sdr(Config):
             data = cursor.fetchall()
             ip = data[0]['ip']
             conn.close()
-            
-            date = datetime.now()
-
-            delta = date - timedelta(hours=1)
-
-            selisih = date - delta
-            # print("selisih: ", selisih)
-
-            # print("delta: ",delta)
-            st_date = str(delta.replace(microsecond=0))
-
-            dt_timestamp = int(time.mktime(datetime.strptime(st_date, "%Y-%m-%d %H:%M:%S").timetuple()))
-            # print(dt_timestamp)
 
             url = uri+"/zabbix/api_jsonrpc.php"
 
@@ -544,86 +539,94 @@ class Master_sdr(Config):
 
             response = requests.request("POST", url, headers=headers, data=payload)
             data = response.json()
-            result = data['result']
+            # print(data)
+            download_id = data['result'][0]['itemid']
+            upload_id = data['result'][1]['itemid']
             # print(result)
-            df = pd.DataFrame(result)
-            # print(df)
-            # return 9
-            # get itemid for download and upload
-            download_id = df['itemid'][0]
-            upload_id = df['itemid'][1]
+   
+            if state=="download":
+                # get history download
+                payload = json.dumps({
+                "jsonrpc": "2.0",
+                "method": "history.get",
+                "params": {
+                    "output": "extend",
+                    "history": 3,
+                    "itemids": download_id,
+                    "sortfield": "clock",
+                    "sortorder": "DESC",
+                    "time_from": st_timestamp,
+                    "time_till": dt_timestamp
+                },
+                "auth": token,
+                "id": 1
+                })
+                headers = {
+                'Content-Type': 'application/json'
+                }
 
-            # get history download
-            payload = json.dumps({
-            "jsonrpc": "2.0",
-            "method": "history.get",
-            "params": {
-                "output": "extend",
-                "history": 3,
-                "itemids": download_id,
-                "sortfield": "clock",
-                "sortorder": "ASC",
-                "time_from": dt_timestamp
-            },
-            "auth": token,
-            "id": 1
-            })
-            headers = {
-            'Content-Type': 'application/json'
-            }
+                response = requests.request("POST", url, headers=headers, data=payload)
+                data = response.json()
+                res_download = data['result']
+                temp_download = []
+                for j in res_download:
+                    val_do = (int(j['value']))/1000
+                # print(to)
+                    temp_download.append(val_do)
+                df = pd.DataFrame(res_download)
+                temp_time = []
+                for k in res_download:
+                    cl = int(k['clock'])
+                    to_obj = datetime.fromtimestamp(cl)
+                    temp_time.append(to_obj)
+                df['val_download']=temp_download
+                df['time']=temp_time
+                df = df.loc[:,('val_download', 'time')]
+                return df.to_dict("records")
+                
+            elif state=="upload":
+                # get history upload
+                payload = json.dumps({
+                "jsonrpc": "2.0",
+                "method": "history.get",
+                "params": {
+                    "output": "extend",
+                    "history": 3,
+                    "itemids": upload_id,
+                    "sortfield": "clock",
+                    "sortorder": "DESC",
+                    "time_from": st_timestamp,
+                    "time_till": dt_timestamp
+                },
+                "auth": token,
+                "id": 1
+                })
+                headers = {
+                'Content-Type': 'application/json'
+                }
 
-            response = requests.request("POST", url, headers=headers, data=payload)
-            data = response.json()
-            res_download = data['result']
-            temp_download = []
-            for j in res_download:
-                val_do = (int(j['value']))/1000
-            # print(to)
-                temp_download.append(val_do)
-            # print(temp_download)
-            # exit()
-            df2 = pd.DataFrame(res_download)
-            # print(res_download)
-            temp_time = []
-            for k in res_download:
-                cl = int(k['clock'])
-                to_obj = datetime.fromtimestamp(cl)
-            #   # print(to_obj)
-                temp_time.append(to_obj)
-            df2['val_download']=temp_download
-            df2['time']=temp_time
-            # temp_download
-            # temp_time
-            # get history upload
-            payload = json.dumps({
-            "jsonrpc": "2.0",
-            "method": "history.get",
-            "params": {
-                "output": "extend",
-                "history": 3,
-                "itemids": upload_id,
-                "sortfield": "clock",
-                "sortorder": "ASC",
-                "time_from": dt_timestamp
-            },
-            "auth": token,
-            "id": 1
-            })
-            headers = {
-            'Content-Type': 'application/json'
-            }
-
-            r2 = requests.request("POST", url, headers=headers, data=payload)
-            data_upload = r2.json()
-            res_upload = data_upload['result']
-            temp_upload = []
-            for u in res_upload:
-                val_up = (int(u['value']))/1000
-            # print(to)
-                temp_upload.append(val_up)
-            df2['val_upload']=temp_upload
-            df2 = df2.loc[:,['val_download','val_upload','time']]
-            return df2.to_dict("records")
+                r2 = requests.request("POST", url, headers=headers, data=payload)
+                data_upload = r2.json()
+                res_upload = data_upload['result']
+                # print(data_upload)
+                temp_upload = []
+                for k in res_upload:
+                    val_up = (int(k['value']))/1000
+                # print(to)
+                    temp_upload.append(val_up)
+                temp_time = []
+                for l in res_upload:
+                    cl = int(l['clock'])
+                    to_obj = datetime.fromtimestamp(cl)
+                #   # print(to_obj)
+                    temp_time.append(to_obj)
+                df = pd.DataFrame(res_upload)
+                df['val_upload']=temp_upload
+                df['time']=temp_time
+                df = df.loc[:,('val_upload', 'time')]
+                return df.to_dict("records")
+            else:
+                return {"There's no state selected"}
 
         except Exception as e:
             raise e
