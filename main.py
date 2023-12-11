@@ -75,6 +75,11 @@ def update_tr_status():
 def update_tr_status_port():
     return sdr.put_tr_statusport()
 
+# cron update modem status 
+@app.get("/api/v1/update-tr-modem-status/", tags=["SDR Terminal Reference"], status_code=200)
+def update_tr_status_port():
+    return sdr.put_modem_status()
+
 @app.get("/api/v1/status-off/", tags=["SDR Terminal Reference"], status_code=200)
 def get_list_off():
     return sdr.get_sites_status_off()

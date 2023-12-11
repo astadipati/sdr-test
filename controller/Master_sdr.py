@@ -5,6 +5,7 @@ import time
 import subprocess
 import requests
 import json
+import re
 
 
 
@@ -73,7 +74,8 @@ class Master_sdr(Config):
                         VALUES('{terminal_id}','{date}','{time_processing}','{rtn}') """
             cursor.execute(query)
             conn.commit()
-            conn.close()
+            # return 9
+            # conn.close()
             # return "OK"
             
             uri = self.cfx.config['URL_SNT']
@@ -100,8 +102,8 @@ class Master_sdr(Config):
                     "data": {
                         "Name":uname,
                         "Port":port,
-                        "Time":time_processing
-                        # "Executed": "%s seconds" % (time.time() - start)
+                        "Time":time_processing,
+                        "Executed": "%s seconds" % (time.time() - start)
                     }
                 }
                 # conn = self.cfx.connectDB()
@@ -130,29 +132,75 @@ class Master_sdr(Config):
     def upload(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
+        print(type(terminal_id))
+        try:
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # date = date.replace(microsecond=0)
+            # print(type(date))
+            # print(type(time_processing))
+            fwd = "FWD"
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                        VALUES('{terminal_id}','{date}','{time_processing}','{fwd}') """
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
+            # return "OK"
+            
+            uri = self.cfx.config['URL_SNT']
+            url = uri+"/flux/api/server/statusport"
 
-        subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
-                                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            payload={}
+            headers = {}
 
-        info = {
-            "status": "200",
-            "data": {
-                "Name":uname,
-                "Port":port,
-                "Time":time_processing,
-                "Executed": "%s seconds" % (time.time() - start)
-            }
-        }
-        date = datetime.now()
-        date = date.replace(microsecond=0)
-        conn = self.cfx.connectDB()
-        cursor = conn.cursor(dictionary=True)
-        query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-        VALUES('{terminal_id}','{date}','{time_processing}','FWD' """
-        cursor.execute(query)
-        conn.commit()
-        conn.close()
-        return info
+            response = requests.request("GET", url, headers=headers, data=payload)
+            data = response.json()
+            df = pd.DataFrame(data)
+            # print(df)
+            
+            df = df.loc[df['ip']==ip_tr]
+            val = df['status_port'].values[0]
+       
+            if val=='listen':
+                print("jalankan")
+        
+
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
+                                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
+                info = {
+                    "status": "200",
+                    "data": {
+                        "Name":uname,
+                        "Port":port,
+                        "Time":time_processing,
+                        "Executed": "%s seconds" % (time.time() - start)
+                    }
+                }
+            # date = datetime.now()
+            # date = date.replace(microsecond=0)
+                # conn = self.cfx.connectDB()
+                # cursor = conn.cursor(dictionary=True)
+                # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                #         VALUES('{terminal_id}','{date}','{time_processing}','FWD' """
+                # cursor.execute(query)
+                # conn.commit()
+                # conn.close()
+                return info
+            else:
+                info = {
+                    "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
+                    "data": {
+                        "Name":uname,
+                        "Port":port,
+                        "Time":time_processing,
+                        "Executed": "%s seconds" % (time.time() - start)
+                    }
+                }
+            return info
+        except Exception as e:
+            raise e
 
     def get_sites(self):
         try:
@@ -368,6 +416,53 @@ class Master_sdr(Config):
 
         except Exception as e:
             raise e
+    
+    def put_modem_status(self):
+        try:
+            now = datetime.now()
+            now = now.replace(microsecond=0, second=0)
+            now = now.strftime("%H:%M:%S")
+            uri = self.cfx.config['URL_SNT']
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            
+            # print(df)
+            # return 9
+            url = uri+"/flux/api/zabbix/status2"
+            payload = {}
+            headers = {}
+            response = requests.request("GET", url, headers=headers, data=payload)
+            res = response.json()
+            # print(res['name'])
+            # val = res[0]['name']
+            # split_values = val.split('(')
+            # val2 = split_values[1].rstrip(')')
+            # return val2
+            ada = []
+            gak = []
+            for i in res:
+                # print(i['name'])
+                val = i['name']
+                val = val.split('(')
+                val = val[1].rstrip(')')
+                
+                status = i['lastvalue']
+                print(status)
+                query = f"""UPDATE iperf.sites 
+                            SET modem_status = {status}
+                            WHERE subscriber_number='{val}'"""
+                
+                cursor.execute(query)
+                conn.commit()
+                # conn.close()
+                ada.append(val)
+                
+           
+            
+            return ada
+
+        except Exception as e:
+            raise e
         
     def put_tr_statusport(self):
         try:
@@ -482,7 +577,7 @@ class Master_sdr(Config):
         # now = now.strftime("%Y-%m-%d %H:%M:%S")
         try:
             start_date = str(start_date + " 00:00:00")
-            end_date = str(end_date+" 11:59:59")
+            end_date = str(end_date+" 23:59:59")
           
             st_timestamp = int(time.mktime(datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S").timetuple()))
             # print("st_timestamp", st_timestamp)
@@ -526,7 +621,7 @@ class Master_sdr(Config):
                     "output": ["itemid","key_","lastvalue","lastclock"],
                     "host" : ip,
                     "filter": {
-                        "key_": ["net.if.in[\"eth0\"]","net.if.out[\"eth0\"]"]
+                        "key_": ["net.if.in[\"eth1\"]","net.if.out[\"eth1\"]"]
                     },
                     "sortfield": "name"
                 },
@@ -570,7 +665,7 @@ class Master_sdr(Config):
                 res_download = data['result']
                 temp_download = []
                 for j in res_download:
-                    val_do = (int(j['value']))/1000
+                    val_do = (int(j['value']))/1048576
                 # print(to)
                     temp_download.append(val_do)
                 df = pd.DataFrame(res_download)
@@ -611,7 +706,7 @@ class Master_sdr(Config):
                 # print(data_upload)
                 temp_upload = []
                 for k in res_upload:
-                    val_up = (int(k['value']))/1000
+                    val_up = (int(k['value']))/1048576
                 # print(to)
                     temp_upload.append(val_up)
                 temp_time = []
