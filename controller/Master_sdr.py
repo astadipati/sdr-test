@@ -58,12 +58,14 @@ class Master_sdr(Config):
             return data
         except Exception as e:
             raise e
-
+    # FWD
     def download(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
         start = time.time()
         print(type(terminal_id))
         try:
-            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date = datetime.now()
+            date = (date - timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S')
             # date = date.replace(microsecond=0)
             # print(type(date))
             # print(type(time_processing))
@@ -95,7 +97,7 @@ class Master_sdr(Config):
             if val=='listen':
                 print("jalankan")
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
                                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
                 info = {
                     "status": "sukses",
@@ -128,13 +130,15 @@ class Master_sdr(Config):
             return info
         except Exception as e:
             raise e
-
+    
+    # RTN
     def upload(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
         print(type(terminal_id))
         try:
-            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date = datetime.now()
+            date = (date - timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S')
             # date = date.replace(microsecond=0)
             # print(type(date))
             # print(type(time_processing))
@@ -166,7 +170,7 @@ class Master_sdr(Config):
                 print("jalankan")
         
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
                                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
                 info = {
@@ -672,7 +676,8 @@ class Master_sdr(Config):
                 temp_time = []
                 for k in res_download:
                     cl = int(k['clock'])
-                    to_obj = datetime.fromtimestamp(cl)
+                    to_obj = datetime.fromtimestamp(cl)-timedelta(hours=7)
+                    # print(type(to_obj))
                     temp_time.append(to_obj)
                 df['val_download']=temp_download
                 df['time']=temp_time
@@ -712,7 +717,7 @@ class Master_sdr(Config):
                 temp_time = []
                 for l in res_upload:
                     cl = int(l['clock'])
-                    to_obj = datetime.fromtimestamp(cl)
+                    to_obj = datetime.fromtimestamp(cl)-timedelta(hours=7)
                 #   # print(to_obj)
                     temp_time.append(to_obj)
                 df = pd.DataFrame(res_upload)
