@@ -5,7 +5,9 @@ import time
 import subprocess
 import requests
 import json
+import paramiko
 import re
+from fastapi import HTTPException
 
 
 
@@ -48,7 +50,7 @@ class Master_sdr(Config):
         try:
             uri = self.cfx.config['URL_SNT']
             print(url)
-            url = uri+"/flux/api/server/statusport"
+            url = uri+"/api/server/statusport"
 
             payload={}
             headers = {}
@@ -70,44 +72,35 @@ class Master_sdr(Config):
             # print(type(date))
             # print(type(time_processing))
             rtn = "RTN"
-            conn = self.cfx.connectDB()
-            cursor = conn.cursor(dictionary=True)
-            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-                        VALUES('{terminal_id}','{date}','{time_processing}','{rtn}') """
-            cursor.execute(query)
-            conn.commit()
-            # return 9
-            # conn.close()
-            # return "OK"
-            
-            uri = self.cfx.config['URL_SNT']
-            url = uri+"/flux/api/server/statusport"
-
-            payload={}
-            headers = {}
-
-            response = requests.request("GET", url, headers=headers, data=payload)
-            data = response.json()
-            df = pd.DataFrame(data)
-            # print(df)
-            
-            df = df.loc[df['ip']==ip_tr]
-            val = df['status_port'].values[0]
-       
-            if val=='listen':
-                print("jalankan")
+            # conn = self.cfx.connectDB()
+            # cursor = conn.cursor(dictionary=True)
+            # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+            #             VALUES('{terminal_id}','{date}','{time_processing}','{rtn}') """
+            # cursor.execute(query)
+            # conn.commit()
+            try:
 
                 subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
-                                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-                info = {
-                    "status": "sukses",
-                    "data": {
-                        "Name":uname,
-                        "Port":port,
-                        "Time":time_processing,
-                        "Executed": "%s seconds" % (time.time() - start)
-                    }
+                                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                return { "status": "sukses",
+                        "data": {
+                            "Name":uname,
+                            "Port":port,
+                            "Time":time_processing,
+                            "Executed": "%s seconds" % (time.time() - start)
+                        }}
+            except Exception as e:
+                 raise HTTPException(status_code=400, detail="Bad Request")
+            # return 9
+            info = {
+                "status": "sukses",
+                "data": {
+                    "Name":uname,
+                    "Port":port,
+                    "Time":time_processing,
+                    "Executed": "%s seconds" % (time.time() - start)
                 }
+            }
                 # conn = self.cfx.connectDB()
                 # cursor = conn.cursor(dictionary=True)
                 # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
@@ -115,21 +108,21 @@ class Master_sdr(Config):
                 # cursor.execute(query)
                 # conn.commit()
                 # conn.close()
-                return info
-            else:
-                info = {
-                    "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
-                    "data": {
-                        "Name":uname,
-                        "Port":port,
-                        "Time":time_processing,
-                        "Executed": "%s seconds" % (time.time() - start)
-                    }
-                }
+            #     return info
+            # else:
+            #     info = {
+            #         "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
+            #         "data": {
+            #             "Name":uname,
+            #             "Port":port,
+            #             "Time":time_processing,
+            #             "Executed": "%s seconds" % (time.time() - start)
+            #         }
+            #     }
             
             return info
         except Exception as e:
-            raise e
+            raise HTTPException(status_code=400, detail="Bad Request")
     
     # RTN
     def upload(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
@@ -144,36 +137,36 @@ class Master_sdr(Config):
             # print(type(time_processing))
             fwd = "FWD"
             conn = self.cfx.connectDB()
-            cursor = conn.cursor(dictionary=True)
-            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-                        VALUES('{terminal_id}','{date}','{time_processing}','{fwd}') """
-            cursor.execute(query)
-            conn.commit()
-            conn.close()
+            # cursor = conn.cursor(dictionary=True)
+            # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+            #             VALUES('{terminal_id}','{date}','{time_processing}','{fwd}') """
+            # cursor.execute(query)
+            # conn.commit()
+            # conn.close()
             # return "OK"
             
-            uri = self.cfx.config['URL_SNT']
-            url = uri+"/flux/api/server/statusport"
+            # uri = self.cfx.config['URL_SNT']
+            # url = uri+"/api/server/statusport"
 
-            payload={}
-            headers = {}
+            # payload={}
+            # headers = {}
 
-            response = requests.request("GET", url, headers=headers, data=payload)
-            data = response.json()
-            df = pd.DataFrame(data)
-            # print(df)
+            # response = requests.request("GET", url, headers=headers, data=payload)
+            # data = response.json()
+            # df = pd.DataFrame(data)
+            # # print(df)
             
-            df = df.loc[df['ip']==ip_tr]
-            val = df['status_port'].values[0]
+            # df = df.loc[df['ip']==ip_tr]
+            # val = df['status_port'].values[0]
        
-            if val=='listen':
-                print("jalankan")
-        
+            # if val=='listen':
+            #     print("jalankan")
+            try:
 
                 subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
-                                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-                info = {
+                return {
                     "status": "200",
                     "data": {
                         "Name":uname,
@@ -182,6 +175,8 @@ class Master_sdr(Config):
                         "Executed": "%s seconds" % (time.time() - start)
                     }
                 }
+            except Exception as e:
+                 raise HTTPException(status_code=400, detail="Bad Request")
             # date = datetime.now()
             # date = date.replace(microsecond=0)
                 # conn = self.cfx.connectDB()
@@ -191,20 +186,20 @@ class Master_sdr(Config):
                 # cursor.execute(query)
                 # conn.commit()
                 # conn.close()
-                return info
-            else:
-                info = {
-                    "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
-                    "data": {
-                        "Name":uname,
-                        "Port":port,
-                        "Time":time_processing,
-                        "Executed": "%s seconds" % (time.time() - start)
-                    }
-                }
+            #     return info
+            # else:
+            #     info = {
+            #         "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
+            #         "data": {
+            #             "Name":uname,
+            #             "Port":port,
+            #             "Time":time_processing,
+            #             "Executed": "%s seconds" % (time.time() - start)
+            #         }
+            #     }
             return info
         except Exception as e:
-            raise e
+            raise HTTPException(status_code=400, detail="Bad Request")
 
     def get_sites(self):
         try:
@@ -250,7 +245,7 @@ class Master_sdr(Config):
             df['status'] = st
             
             # # # status port
-            # url = uri+"/flux/api/server/statusport"
+            # url = uri+"/api/server/statusport"
 
             # payload = {}
             # headers = {}
@@ -298,7 +293,7 @@ class Master_sdr(Config):
             df['status'] = st
             
             # # status port
-            url = uri+"/flux/api/server/statusport"
+            url = uri+"/api/server/statusport"
 
             payload = {}
             headers = {}
@@ -352,7 +347,7 @@ class Master_sdr(Config):
             df = pd.DataFrame(data)
             print(df)
             # return 9
-            url = uri+"/flux/api/zabbix/status"
+            url = uri+"/api/zabbix/status"
 
             payload = {}
             headers = {}
@@ -388,12 +383,13 @@ class Master_sdr(Config):
             
             # print(df)
             # return 9
-            url = uri+"/flux/api/zabbix/status"
+            url = "http://202.95.150.42/api/zabbix/status"
             payload = {}
             headers = {}
             response = requests.request("GET", url, headers=headers, data=payload)
             res = response.json()
             # print(res)
+            # return 9
             df = pd.DataFrame(res)
             # print(df['lastvalue'])
             temp = []
@@ -432,7 +428,7 @@ class Master_sdr(Config):
             
             # print(df)
             # return 9
-            url = uri+"/flux/api/zabbix/status2"
+            url = uri+"/api/zabbix/status2"
             payload = {}
             headers = {}
             response = requests.request("GET", url, headers=headers, data=payload)
@@ -477,7 +473,9 @@ class Master_sdr(Config):
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
             
-            url = uri+"/flux/api/server/statusport"
+            url = uri+"/api/server/statusport"
+            # print(url)
+            # return 9
             payload = {}
             headers = {}
             response = requests.request("GET", url, headers=headers, data=payload)
@@ -543,21 +541,21 @@ class Master_sdr(Config):
             # print(df)
             conn.close()
             
-            url = uri+"/flux/api/server/statusport"
+            # url = uri+"/api/server/statusport"
 
-            payload = {}
-            headers = {}
+            # payload = {}
+            # headers = {}
 
-            r = requests.request("GET", url, headers=headers, data=payload)
-            r = r.json()
-            # print(r)
-            # print(ip)
-            temp_statusport = []
-            for j in r:
-                if j['ip']==ip:
-                    temp_statusport.append(j['status_port'])
-                else:
-                    pass
+            # r = requests.request("GET", url, headers=headers, data=payload)
+            # r = r.json()
+            # # print(r)
+            # # print(ip)
+            # temp_statusport = []
+            # for j in r:
+            #     if j['ip']==ip:
+            #         temp_statusport.append(j['status_port'])
+            #     else:
+            #         pass
             # print(temp_statusport[0])
            
             return {
@@ -568,7 +566,7 @@ class Master_sdr(Config):
                 "ip":ip,
                 "ip_server":ip_server,
                 "port_server":port_server,
-                "status_port":temp_statusport[0],
+                "status_port":"",
                 "status":status,
                 "duration":duration
             }
@@ -597,8 +595,9 @@ class Master_sdr(Config):
             ip = data[0]['ip']
             conn.close()
 
-            url = uri+"/zabbix/api_jsonrpc.php"
-
+            url = uri+"/api_jsonrpc.php"
+            # print(url)
+            # return 9
             payload = json.dumps({
             "jsonrpc": "2.0",
             "method": "user.login",
@@ -617,6 +616,7 @@ class Master_sdr(Config):
             data = response.json()
             token = data['result']
             print("token:",token)
+            # return 9
             # get download id
             payload = json.dumps({
             "jsonrpc": "2.0",
@@ -985,11 +985,65 @@ class Master_sdr(Config):
         try:
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT * FROM iperf.log_kratos"
+            query = f"SELECT * FROM iperf.log_kratos ORDER BY id DESC"
             cursor.execute(query)
             data = cursor.fetchall()
             conn.close()
             return data
 
+        except Exception as e:
+            raise e
+        
+    def recap_sdr(self):
+
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT s.id, s.hit_upload, s.hit_download, s.subscriber_number, s.val_download, s.val_upload, s.updated_at from iperf.sites s"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            temp =[]
+            for i in data:
+                dt = str(i['updated_at'])
+                # print(i)
+                dt = datetime.fromisoformat(dt)
+                dt = dt.strftime("%d/%m/%Y %H:%M:%S")
+                temp.append(dt)
+            df['updated_at']=temp
+            df = df.loc[:,['id','hit_upload','hit_download','subscriber_number','val_download','val_upload','updated_at']]
+            val = df.to_dict('records')
+            # print(val)
+            # print(data)
+            conn.close()
+            return val
+
+        except Exception as e:
+            raise e
+
+    def reboot_pid(self, terminal_id):
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"SELECT s.id, s.subscriber_number, s.port_server from iperf.sites s where s.id = {terminal_id}"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            port = data[0]['port_server']
+            ssh_client.connect('172.29.64.64', username='ubuntu', password='snt2023.')
+            com_pid = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
+            stdin, stdout, stderr = ssh_client.exec_command(com_pid)
+            pid = stdout.read().decode().strip()
+            ssh_client.exec_command(f"sudo kill -9 {int(pid)}")
+            ssh_client.exec_command(f"iperf3 -s -p {int(port)} -D")
+            # print(com_kill,": executed")
+            # print(com_up,": executed")
+            ssh_client.close()
+            # pid = con_pid.read().decode().strip()
+            # print(pid)
+            # command = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
+            # stdin, stdout, stderr = ssh_client.exec_command(command)
+            # pid = stdout.read().decode().strip()
         except Exception as e:
             raise e

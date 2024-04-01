@@ -1,5 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import ORJSONResponse
 from dotenv import dotenv_values
 from config.config import Config
@@ -142,6 +142,11 @@ def post_scheduler(post: IsScheduler):
     sdr.post_scheduler(post)
     return (post)
 
+@app.post("/api/v1/reboot-pid/{id}", tags=["Scheduler SDR"], status_code=200)
+def post_pid(id: int):
+    sdr.reboot_pid(id)
+    return {"status": "Success"}
+
 
 @app.put("/api/v1/update-scheduler/{id}", tags=["Scheduler SDR"], status_code=200)
 def update_scheduler(id: str, post: IsScheduler):
@@ -157,6 +162,10 @@ def delete_scheduler(id: str):
 @app.get("/api/v1/log-kratos", tags=["SDR Module"], status_code=200)
 async def get_log_kratos():
     return sdr.data_log()
+
+@app.get("/api/v1/recap-sdr", tags=["SDR Module"], status_code=200)
+async def get_recap_sdr():
+    return sdr.recap_sdr()
 
 
 @app.get("/api/n5/max-download/{device_id}", tags=["SDR Module"], status_code=200)
