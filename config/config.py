@@ -18,3 +18,10 @@ class Config:
     def connectMongo(self):
         # connect to mongo
         return MongoClient(self.config['URLMONGO'])
+    
+    def server(self):
+        return {
+            "ip":self.config['IP'],
+            "uname":self.config['UNAME'],
+            "passwd":self.config['PASSWD']
+        }

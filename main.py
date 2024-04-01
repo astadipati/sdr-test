@@ -142,9 +142,9 @@ def post_scheduler(post: IsScheduler):
     sdr.post_scheduler(post)
     return (post)
 
-@app.post("/api/v1/reboot-pid/{id}", tags=["Scheduler SDR"], status_code=200)
-def post_pid(id: int):
-    sdr.reboot_pid(id)
+@app.post("/api/v1/reboot-pid/{subsciber_number}", tags=["Scheduler SDR"], status_code=200)
+def post_pid(subsciber_number: str):
+    sdr.reboot_pid(subsciber_number)
     return {"status": "Success"}
 
 

@@ -9,7 +9,9 @@ import paramiko
 import re
 from fastapi import HTTPException
 
+from dotenv import dotenv_values
 
+# config = dotenv_values()
 
 class Master_sdr(Config):
     
@@ -80,7 +82,7 @@ class Master_sdr(Config):
             # conn.commit()
             try:
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 6M -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
                                         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
                 return { "status": "sukses",
                         "data": {
@@ -163,7 +165,7 @@ class Master_sdr(Config):
             #     print("jalankan")
             try:
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 23M -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
                                         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
                 return {
@@ -1021,20 +1023,34 @@ class Master_sdr(Config):
         except Exception as e:
             raise e
 
-    def reboot_pid(self, terminal_id):
+    def reboot_pid(self, subsciber_number):
+        print(subsciber_number)
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
+            # uname = config[("UNAME")]
+            # print(uname)
+            # server
+            srv = self.cfx.server()
+            # print(srv['ip'])
+            ip =srv['ip']
+            uname = srv['uname']
+            passwd = srv['passwd']
+            # return 9
             conn = self.cfx.connectDB()
             cursor = conn.cursor(dictionary=True)
-            query = f"SELECT s.id, s.subscriber_number, s.port_server from iperf.sites s where s.id = {terminal_id}"
+            query = f"SELECT s.id, s.subscriber_number, s.port_server from iperf.sites s where s.subscriber_number = '{subsciber_number}'"
             cursor.execute(query)
             data = cursor.fetchall()
+            print(data)
+            # return 9
             port = data[0]['port_server']
-            ssh_client.connect('172.29.64.64', username='ubuntu', password='snt2023.')
+            ssh_client.connect(ip, username=uname, password=passwd)
             com_pid = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
             stdin, stdout, stderr = ssh_client.exec_command(com_pid)
             pid = stdout.read().decode().strip()
+            print(pid)
+            return 9
             ssh_client.exec_command(f"sudo kill -9 {int(pid)}")
             ssh_client.exec_command(f"iperf3 -s -p {int(port)} -D")
             # print(com_kill,": executed")
