@@ -1042,7 +1042,7 @@ class Master_sdr(Config):
             query = f"SELECT s.id, s.subscriber_number, s.port_server from iperf.sites s where s.subscriber_number = '{subsciber_number}'"
             cursor.execute(query)
             data = cursor.fetchall()
-            print(data)
+            print("port server", data[0]['port_server'])
             # return 9
             port = data[0]['port_server']
             ssh_client.connect(ip, username=uname, password=passwd)
@@ -1050,16 +1050,28 @@ class Master_sdr(Config):
             stdin, stdout, stderr = ssh_client.exec_command(com_pid)
             pid = stdout.read().decode().strip()
             print(pid)
-            return 9
+            # return 9
             ssh_client.exec_command(f"sudo kill -9 {int(pid)}")
+            exe ="kill "+pid
+            time.sleep(2)
             ssh_client.exec_command(f"iperf3 -s -p {int(port)} -D")
             # print(com_kill,": executed")
             # print(com_up,": executed")
+            com_pid2 = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
+            stdin, stdout, stderr = ssh_client.exec_command(com_pid2)
+            pid2 = stdout.read().decode().strip()
+            print(pid2)
             ssh_client.close()
             # pid = con_pid.read().decode().strip()
             # print(pid)
             # command = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
             # stdin, stdout, stderr = ssh_client.exec_command(command)
             # pid = stdout.read().decode().strip()
+            data = {
+                "status":"successfully reload port",
+                "old pid":pid,
+                "new pid":pid2
+            }
+            return data
         except Exception as e:
-            raise e
+            raise HTTPException(status_code=400, detail="Something went wrong")
