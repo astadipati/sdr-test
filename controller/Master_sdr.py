@@ -405,10 +405,12 @@ class Master_sdr(Config):
                 # else:
                 #     pass
                 # return 8
+                # query = f"""UPDATE iperf.sites 
+                #             SET status = {status}
+                #             WHERE ip='{ip}'"""
                 query = f"""UPDATE iperf.sites 
-                            SET status = {status}
+                            SET status = 1
                             WHERE ip='{ip}'"""
-                
                 cursor.execute(query)
                 conn.commit()
                 # conn.close()
@@ -1053,7 +1055,7 @@ class Master_sdr(Config):
             # return 9
             ssh_client.exec_command(f"sudo kill -9 {int(pid)}")
             exe ="kill "+pid
-            time.sleep(2)
+            time.sleep(10)
             ssh_client.exec_command(f"iperf3 -s -p {int(port)} -D")
             # print(com_kill,": executed")
             # print(com_up,": executed")
