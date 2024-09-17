@@ -8,6 +8,7 @@ import json
 import paramiko
 import re
 from fastapi import HTTPException
+from bson import ObjectId
 
 from dotenv import dotenv_values
 
@@ -62,27 +63,29 @@ class Master_sdr(Config):
             return data
         except Exception as e:
             raise e
-    # FWD
+        
+    # RTN Direct
     def download(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
         start = time.time()
         print(type(terminal_id))
         try:
             # date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             date = datetime.now()
-            date = (date - timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S')
+            date = (date - timedelta(hours=6, minutes=58)).strftime('%Y-%m-%d %H:%M:%S')
             # date = date.replace(microsecond=0)
             # print(type(date))
             # print(type(time_processing))
-            rtn = "RTN"
-            # conn = self.cfx.connectDB()
-            # cursor = conn.cursor(dictionary=True)
-            # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-            #             VALUES('{terminal_id}','{date}','{time_processing}','{rtn}') """
-            # cursor.execute(query)
-            # conn.commit()
+            # rtn = "RTN"
+            conn = self.cfx.connectDB()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                        VALUES('{terminal_id}','{date}','1500','RTN') """
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
             try:
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 6M -p {port} -t {time_processing} > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 6M -p {port} -t 1620 > /dev/null 2>/dev/null &",
                                         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
                 return { "status": "sukses",
                         "data": {
@@ -94,57 +97,29 @@ class Master_sdr(Config):
             except Exception as e:
                  raise HTTPException(status_code=400, detail="Bad Request")
             # return 9
-            info = {
-                "status": "sukses",
-                "data": {
-                    "Name":uname,
-                    "Port":port,
-                    "Time":time_processing,
-                    "Executed": "%s seconds" % (time.time() - start)
-                }
-            }
-                # conn = self.cfx.connectDB()
-                # cursor = conn.cursor(dictionary=True)
-                # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-                #         VALUES('{terminal_id}','{date}','{time_processing}','RTN' """
-                # cursor.execute(query)
-                # conn.commit()
-                # conn.close()
-            #     return info
-            # else:
-            #     info = {
-            #         "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
-            #         "data": {
-            #             "Name":uname,
-            #             "Port":port,
-            #             "Time":time_processing,
-            #             "Executed": "%s seconds" % (time.time() - start)
-            #         }
-            #     }
-            
-            return info
+           
         except Exception as e:
             raise HTTPException(status_code=400, detail="Bad Request")
     
-    # RTN
+    # FWD Direct
     def upload(self, terminal_id, uname, ip_tr, ip_server, port, time_processing):
 
         start = time.time()
         print(type(terminal_id))
         try:
             date = datetime.now()
-            date = (date - timedelta(hours=7)).strftime('%Y-%m-%d %H:%M:%S')
+            date = (date - timedelta(hours=6, minutes=58)).strftime('%Y-%m-%d %H:%M:%S')
             # date = date.replace(microsecond=0)
             # print(type(date))
             # print(type(time_processing))
             fwd = "FWD"
             conn = self.cfx.connectDB()
-            # cursor = conn.cursor(dictionary=True)
-            # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-            #             VALUES('{terminal_id}','{date}','{time_processing}','{fwd}') """
-            # cursor.execute(query)
-            # conn.commit()
-            # conn.close()
+            cursor = conn.cursor(dictionary=True)
+            query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
+                        VALUES('{terminal_id}','{date}','1500','FWD') """
+            cursor.execute(query)
+            conn.commit()
+            conn.close()
             # return "OK"
             
             # uri = self.cfx.config['URL_SNT']
@@ -165,7 +140,7 @@ class Master_sdr(Config):
             #     print("jalankan")
             try:
 
-                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 23M -p {port} -t {time_processing} -R > /dev/null 2>/dev/null &",
+                subprocess.Popen(f"ssh {uname}@{ip_tr} -i ~/.ssh/id_rsa iperf3 -c {ip_server} -u -b 23M -p {port} -t 1620 -R > /dev/null 2>/dev/null &",
                                         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
                 return {
@@ -179,27 +154,7 @@ class Master_sdr(Config):
                 }
             except Exception as e:
                  raise HTTPException(status_code=400, detail="Bad Request")
-            # date = datetime.now()
-            # date = date.replace(microsecond=0)
-                # conn = self.cfx.connectDB()
-                # cursor = conn.cursor(dictionary=True)
-                # query = f"""INSERT INTO iperf.log_kratos (terminal_id,start_datetime,duration, fwd_rtn_selection) 
-                #         VALUES('{terminal_id}','{date}','{time_processing}','FWD' """
-                # cursor.execute(query)
-                # conn.commit()
-                # conn.close()
-            #     return info
-            # else:
-            #     info = {
-            #         "status": f"Port {port} terpakai, tidak dapat melakukan test SDR",
-            #         "data": {
-            #             "Name":uname,
-            #             "Port":port,
-            #             "Time":time_processing,
-            #             "Executed": "%s seconds" % (time.time() - start)
-            #         }
-            #     }
-            return info
+            
         except Exception as e:
             raise HTTPException(status_code=400, detail="Bad Request")
 
@@ -385,85 +340,26 @@ class Master_sdr(Config):
             
             # print(df)
             # return 9
-            url = "http://202.95.150.42/api/zabbix/status"
+            url = "http://172.29.64.105/api/zabbix/status2"
             payload = {}
             headers = {}
             response = requests.request("GET", url, headers=headers, data=payload)
-            res = response.json()
+            data = response.json()
             # print(res)
-            # return 9
-            df = pd.DataFrame(res)
-            # print(df['lastvalue'])
-            temp = []
-            for i in range(len(df['ip'])):
-                ip = df['ip'][i]
-                # print(ip)
-                status = int(df['lastvalue'][i])
-                print(status)
-                # if status == 1:
-                #     temp.append(status)
-                # else:
-                #     pass
-                # return 8
-                # query = f"""UPDATE iperf.sites 
-                #             SET status = {status}
-                #             WHERE ip='{ip}'"""
+            temp =[]
+            for i in data:
+                tr = i['name'].split(" ")[-1].strip("()")
+                lv = i['lastvalue']
                 query = f"""UPDATE iperf.sites 
-                            SET status = 1
-                            WHERE ip='{ip}'"""
-                cursor.execute(query)
-                conn.commit()
-                # conn.close()
-                # temp.append(ip)
-            
-            return temp
-
-        except Exception as e:
-            raise e
-    
-    def put_modem_status(self):
-        try:
-            now = datetime.now()
-            now = now.replace(microsecond=0, second=0)
-            now = now.strftime("%H:%M:%S")
-            uri = self.cfx.config['URL_SNT']
-            conn = self.cfx.connectDB()
-            cursor = conn.cursor(dictionary=True)
-            
-            # print(df)
-            # return 9
-            url = uri+"/api/zabbix/status2"
-            payload = {}
-            headers = {}
-            response = requests.request("GET", url, headers=headers, data=payload)
-            res = response.json()
-            # print(res['name'])
-            # val = res[0]['name']
-            # split_values = val.split('(')
-            # val2 = split_values[1].rstrip(')')
-            # return val2
-            ada = []
-            gak = []
-            for i in res:
-                # print(i['name'])
-                val = i['name']
-                val = val.split('(')
-                val = val[1].rstrip(')')
-                
-                status = i['lastvalue']
-                print(status)
-                query = f"""UPDATE iperf.sites 
-                            SET modem_status = {status}
-                            WHERE subscriber_number='{val}'"""
+                            SET status = {lv}
+                            WHERE subscriber_number='{tr}'"""
                 
                 cursor.execute(query)
                 conn.commit()
-                # conn.close()
-                ada.append(val)
-                
-           
+                temp.append(tr)
+                # print(lv)
+            return temp       
             
-            return ada
 
         except Exception as e:
             raise e
@@ -540,7 +436,7 @@ class Master_sdr(Config):
                 status="Active"
             else:
                 status="Not Active"
-            duration = data[0]['duration']
+            duration = 1500
             # df = pd.DataFrame(data)
             # print(df)
             conn.close()
@@ -1063,17 +959,32 @@ class Master_sdr(Config):
             stdin, stdout, stderr = ssh_client.exec_command(com_pid2)
             pid2 = stdout.read().decode().strip()
             print(pid2)
-            ssh_client.close()
             # pid = con_pid.read().decode().strip()
             # print(pid)
             # command = f"sudo lsof -i :{port} | awk 'NR==2 {{print $2}}'"
             # stdin, stdout, stderr = ssh_client.exec_command(command)
             # pid = stdout.read().decode().strip()
+            date = datetime.now()
+            # parse_date = datetime.fromisoformat(date)
+            dt = date.strftime("%Y-%m-%d %H:%M:%S")
             data = {
+                "terminal":subsciber_number,
                 "status":"successfully reload port",
-                "old pid":pid,
-                "new pid":pid2
+                "old_pid":pid,
+                "new_pid":pid2,
+                "date": dt
             }
+            # save log to mongo
+            print(data)
+            # log = 
+            konn = self.cfx.connectMongo()
+            db = konn.N3
+            collection = db.sdr_reload_port_log
+            res = collection.insert_one(data)
+            data['_id'] = str(res.inserted_id)
+            konn.close()
+            ssh_client.close()
+            
             return data
         except Exception as e:
             raise HTTPException(status_code=400, detail="Something went wrong")
